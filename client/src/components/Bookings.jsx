@@ -25,7 +25,7 @@ export default function Bookings({ token, customer }) {
 
     const fetchServices = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:5000/services", {
+        const res = await fetch("https://beauty-parlor-app-5.onrender.com/services", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -48,7 +48,7 @@ export default function Bookings({ token, customer }) {
     const fetchStylists = async () => {
       try {
         const res = await fetch(
-          `http://127.0.0.1:5000/services/${selectedService}`,
+          `https://beauty-parlor-app-5.onrender.com/services/${selectedService}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -78,7 +78,7 @@ export default function Bookings({ token, customer }) {
     }
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/bookings", {
+      const res = await fetch("https://beauty-parlor-app-5.onrender.com/bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
