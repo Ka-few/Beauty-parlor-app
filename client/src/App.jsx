@@ -20,7 +20,7 @@ function App() {
 
     const fetchMe = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:5000/me", {
+        const res = await fetch("https://beauty-parlor-app-5.onrender.com/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
