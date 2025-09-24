@@ -1,87 +1,76 @@
-
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_serializer import SerializerMixin
-from flask_bcrypt import Bcrypt
-from datetime import datetime
 
 db = SQLAlchemy()
 
+# Association table for many-to-many relationship between Stylists and Services
+stylist_service = db.Table(
+    "stylist_service",
+    db.Column("stylist_id", db.Integer, db.ForeignKey("stylist.id"), primary_key=True),
+    db.Column("service_id", db.Integer, db.ForeignKey("service.id"), primary_key=True)
+)
+
+# ----------------- CUSTOMER -----------------
 class Customer(db.Model, SerializerMixin):
-    __tablename__ = "customers"
+    __tablename__ = "customer"
+    serialize_rules = ("-bookings.customer", "-bookings.stylist", "-bookings.service")
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    phone = db.Column(db.String)
-    password_hash = db.Column(db.String, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
 
-    bookings = db.relationship("Booking", back_populates="customer")
+    bookings = db.relationship(
+        "Booking",
+        back_populates="customer",
+        cascade="all, delete-orphan"
+    )
 
-    # Prevent recursion: don't include bookings → customer → bookings loop
-    serialize_rules = ("-bookings.customer",)
-    
-    def set_password(self, password):
-        self.password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
-
-    def check_password(self, password):
-        return bcrypt.check_password_hash(self.password_hash, password)
-
-
-class Stylist(db.Model, SerializerMixin):
-    __tablename__ = "stylists"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    bio = db.Column(db.Text)
-
-    services = db.relationship("StylistService", back_populates="stylist")
-    bookings = db.relationship("Booking", back_populates="stylist")
-
-    serialize_rules = ("-services.stylist", "-bookings.stylist")
-
-
+# ----------------- SERVICE -----------------
 class Service(db.Model, SerializerMixin):
-    __tablename__ = "services"
+    __tablename__ = "service"
+    serialize_rules = ("-stylists.services", "-bookings.service", "-bookings.customer", "-bookings.stylist")
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String)
-    description = db.Column(db.Text)
-    base_price = db.Column(db.Float)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(255), nullable=True)
+    price = db.Column(db.Float, nullable=False)
 
-    stylists = db.relationship("StylistService", back_populates="service")
-    bookings = db.relationship("Booking", back_populates="service")
+# ----------------- STYLIST -----------------
+class Stylist(db.Model, SerializerMixin):
+    __tablename__ = "stylist"
+    serialize_rules = ("-services.stylists", "-bookings.stylist", "-bookings.customer", "-bookings.service")
 
-    serialize_rules = ("-stylists.service", "-bookings.service")
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    bio = db.Column(db.String(255), nullable=True)
 
+    services = db.relationship(
+        "Service",
+        secondary=stylist_service,
+        backref=db.backref("stylists", lazy="joined")
+    )
 
-class StylistService(db.Model, SerializerMixin):
-    __tablename__ = "stylist_services"
+    bookings = db.relationship(
+        "Booking",
+        back_populates="stylist",
+        cascade="all, delete-orphan"
+    )
 
-    stylist_id = db.Column(db.Integer, db.ForeignKey("stylists.id"), primary_key=True)
-    service_id = db.Column(db.Integer, db.ForeignKey("services.id"), primary_key=True)
-
-    stylist = db.relationship("Stylist", back_populates="services")
-    service = db.relationship("Service", back_populates="stylists")
-
-    serialize_rules = ("-stylist.services", "-service.stylists")
-
-
+# ----------------- BOOKING -----------------
 class Booking(db.Model, SerializerMixin):
-    __tablename__ = "bookings"
+    __tablename__ = "booking"
+    serialize_rules = ("-customer.bookings", "-stylist.bookings", "-service.bookings")
 
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"))
-    service_id = db.Column(db.Integer, db.ForeignKey("services.id"))
-    stylist_id = db.Column(db.Integer, db.ForeignKey("stylists.id"))
-    preferred_date = db.Column(db.DateTime)
-    notes = db.Column(db.Text)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    appointment_time = db.Column(db.DateTime, nullable=False)
 
+    customer_id = db.Column(db.Integer, db.ForeignKey("customer.id"), nullable=False)
     customer = db.relationship("Customer", back_populates="bookings")
-    service = db.relationship("Service", back_populates="bookings")
+
+    stylist_id = db.Column(db.Integer, db.ForeignKey("stylist.id"), nullable=False)
     stylist = db.relationship("Stylist", back_populates="bookings")
 
-    # Only include certain fields in serialization
-    serialize_only = ("id", "preferred_date", "notes", "created_at",
-                      "customer.id", "customer.name",
-                      "service.id", "service.title", "service.base_price",
-                      "stylist.id", "stylist.name")
+    service_id = db.Column(db.Integer, db.ForeignKey("service.id"), nullable=False)
+    service = db.relationship("Service", backref="bookings")
