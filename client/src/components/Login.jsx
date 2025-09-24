@@ -19,7 +19,7 @@ export default function Login({ setCustomer, setToken }) {
   // ✅ Handle form submission
   const handleLogin = async (values, { setSubmitting, setStatus }) => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/login", {
+      const res = await fetch("https://beauty-parlor-app-5.onrender.com/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),

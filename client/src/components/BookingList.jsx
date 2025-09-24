@@ -10,7 +10,7 @@ export default function BookingList({ token, customer }) {
     const fetchBookings = async () => {
       try {
         const res = await fetch(
-          `http://127.0.0.1:5000/bookings?customer_id=${customer.id}`,
+          `https://beauty-parlor-app-5.onrender.com/bookings?customer_id=${customer.id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

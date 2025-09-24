@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Services.css"; // ✅ Import the CSS
+import "./Services.css"; // 
 
 export default function Services({ token }) {
   const [services, setServices] = useState([]);
@@ -11,7 +11,7 @@ export default function Services({ token }) {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:5000/services", {
+        const res = await fetch("https://beauty-parlor-app-5.onrender.com/services", {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (res.ok) {

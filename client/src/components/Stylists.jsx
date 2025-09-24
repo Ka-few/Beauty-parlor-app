@@ -19,7 +19,7 @@ export default function StylistList({ token }) {
   // Fetch stylists
   const fetchStylists = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/stylists", {
+      const res = await fetch("https://beauty-parlor-app-5.onrender.com/stylists", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -32,7 +32,7 @@ export default function StylistList({ token }) {
   // Fetch services
   const fetchServices = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/services", {
+      const res = await fetch("https://beauty-parlor-app-5.onrender.com/services", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -55,7 +55,7 @@ export default function StylistList({ token }) {
     if (!newName) return alert("Name is required");
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/stylists", {
+      const res = await fetch("https://beauty-parlor-app-5.onrender.com/stylists", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -86,7 +86,7 @@ export default function StylistList({ token }) {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this stylist?")) return;
     try {
-      const res = await fetch(`http://127.0.0.1:5000/stylists/${id}`, {
+      const res = await fetch(`https://beauty-parlor-app-5.onrender.com/stylists/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -110,7 +110,7 @@ export default function StylistList({ token }) {
     if (!editingName) return alert("Name is required");
 
     try {
-      const res = await fetch(`http://127.0.0.1:5000/stylists/${id}`, {
+      const res = await fetch(`https://beauty-parlor-app-5.onrender.com/stylists/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

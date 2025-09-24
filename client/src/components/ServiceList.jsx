@@ -14,7 +14,7 @@ export default function ServiceList({ token }) {
   // Fetch all services
   const fetchServices = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/services", {
+      const res = await fetch("https://beauty-parlor-app-5.onrender.com/services", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -35,7 +35,7 @@ export default function ServiceList({ token }) {
       return alert("All fields are required");
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/services", {
+      const res = await fetch("https://beauty-parlor-app-5.onrender.com/services", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +67,7 @@ export default function ServiceList({ token }) {
     if (!window.confirm("Are you sure you want to delete this service?")) return;
 
     try {
-      const res = await fetch(`http://127.0.0.1:5000/services/${id}`, {
+      const res = await fetch(`https://beauty-parlor-app-5.onrender.com/services/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -93,7 +93,7 @@ export default function ServiceList({ token }) {
       return alert("All fields are required");
 
     try {
-      const res = await fetch(`http://127.0.0.1:5000/services/${id}`, {
+      const res = await fetch(`https://beauty-parlor-app-5.onrender.com/services/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
