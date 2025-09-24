@@ -206,23 +206,19 @@ export default function StylistList({ token }) {
                   placeholder="Bio"
                 />
 
-                <div>
+                <div className="service-checkboxes">
                   <label>Assign Services:</label>
                   {services.map((service) => (
-                    <label key={service.id} style={{ marginLeft: "10px" }}>
+                    <div key={service.id} className="service-row">
+                      <span>{service.title}</span>
                       <input
                         type="checkbox"
                         checked={editingServiceIds.includes(service.id)}
                         onChange={() =>
-                          toggleService(
-                            service.id,
-                            editingServiceIds,
-                            setEditingServiceIds
-                          )
+                          toggleService(service.id, editingServiceIds, setEditingServiceIds)
                         }
                       />
-                      {service.title}
-                    </label>
+                    </div>
                   ))}
                 </div>
 

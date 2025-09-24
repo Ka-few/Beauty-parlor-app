@@ -1,0 +1,332 @@
+/* index.css */
+
+/* Reset and base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background-color: #f9fafb;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Links and buttons */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* === Navbar === */
+/* === Navbar Global Styles === */
+nav {
+  background: #96198d !important; /* Deep blue override for bg-gray-800 */
+  padding: 1rem 2rem !important; /* override p-4 */
+  color: #fff !important;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+nav .flex {
+  display: flex;
+  align-items: center;
+}
+
+nav .justify-between {
+  justify-content: space-between;
+}
+
+nav .items-center {
+  align-items: center;
+}
+
+nav .space-x-4 > * + * {
+  margin-left: 1.5rem; /* more spacing between links/buttons */
+}
+
+/* Nav links */
+nav a {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #e5e7eb; /* light gray */
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+nav a:hover {
+  color: #ffffff;
+  transform: translateY(-2px);
+  text-decoration: underline;
+}
+
+/* Welcome text */
+nav span {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e3b51b; /* warm accent yellow */
+}
+
+/* Logout button */
+nav button {
+  background: #ef4444; /* red-500 */
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+nav button:hover {
+  background: #dc2626; /* red-600 */
+  transform: scale(1.05);
+}
+/* === Login Page === */
+form {
+  max-width: 400px;
+  margin: 5rem auto; /* center horizontally + spacing from top */
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* space between elements */
+}
+
+form h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #912ebc; /* matches navbar blue */
+}
+
+form input {
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+form input:focus {
+  border-color: #926797; /* blue highlight */
+}
+
+form button {
+  background: #9f60a2;
+  color: #fff;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+form button:hover {
+  background: #6c149c;
+  transform: scale(1.02);
+}
+
+/* Message under form */
+form p {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #dc2626; /* red for error messages */
+  margin-top: 0.5rem;
+}
+/* === Services Page === */
+/* === Services Page === */
+div > h2 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 2rem 0;
+  color: #850fac;
+}
+
+/* Create form styling */
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+form input {
+  flex: 1 1 calc(33% - 1rem);
+  min-width: 200px;
+}
+
+form button {
+  flex: 1 1 100%;
+  max-width: 200px;
+  margin: auto;
+}
+
+/* Service grid — 2 vertical stacks side by side */
+ul {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 vertical stacks */
+  gap: 2rem;
+  list-style: none;
+  padding: 0;
+}
+
+/* Each column (stack of services) */
+ul li {
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom: 1.5rem; /* vertical spacing between stacked services */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+ul li:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+/* Service title */
+ul li strong {
+  font-size: 1.1rem;
+  color: #8e118e;
+}
+
+/* Buttons inside service cards */
+ul li button {
+  background: #470357;
+  color: #fff;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  margin-right: 0.5rem;
+}
+
+ul li button:hover {
+  background: #810395;
+  transform: scale(1.05);
+}
+
+ul li button:nth-of-type(2) {
+  background: #ef4444;
+}
+
+ul li button:nth-of-type(2):hover {
+  background: #dc2626;
+}
+/* === Stylists Page === */
+.stylists-page {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+/* Page title */
+.stylists-page h2 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #1e3a8a;
+}
+
+/* Card style for stylist blocks */
+.stylist-card {
+  background: #ffffff;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  min-height: 180px; /* ensures box can expand if services increase */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Stylist info */
+.stylist-card strong {
+  font-size: 1.2rem;
+  color: #1e3a8a;
+}
+
+.stylist-card em {
+  display: block;
+  margin-top: 0.3rem;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+/* Checkbox container */
+/* Service checkbox container */
+.service-checkboxes {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Section label */
+.service-checkboxes > label:first-child {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Each service row */
+.service-checkboxes .service-row {
+  display: grid;
+  grid-template-columns: 1fr auto; /* service name left, checkbox right */
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Service text */
+.service-checkboxes .service-row span {
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.service-checkboxes input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+/* Buttons */
+.stylist-card button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-right: 0.6rem;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.stylist-card button:hover {
+  background: #1e40af;
+  transform: scale(1.05);
+}
+
+.stylist-card button:nth-of-type(2) {
+  background: #ef4444;
+}
+
+.stylist-card button:nth-of-type(2):hover {
+  background: #dc2626;
+}
