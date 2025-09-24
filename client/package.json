@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "dom": "^0.0.3",
+    "formik": "^2.4.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.1",
-    "router": "^2.2.0"
+    "router": "^2.2.0",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

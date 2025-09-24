@@ -1,0 +1,59 @@
+/* Navbar.css */
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #96198d; /* match book-btn purple */
+  border-bottom: 2px solid rgba(227, 181, 27, 0.7); /* golden accent line */
+  font-family: 'Poppins', sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.navbar .links,
+.navbar .right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.navbar a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #e3b51b; /* golden links */
+  font-size: 1rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.navbar a:hover {
+  color: #fff; /* hover to white for contrast */
+  transform: translateY(-2px);
+}
+
+.welcome {
+  font-weight: 600;
+  color: #fff; /* white text on purple */
+  margin-right: 1rem;
+  font-size: 1rem;
+}
+
+.logout {
+  background: #e3b51b; /* golden button */
+  color: #fff;
+  padding: 0.5rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.logout:hover {
+  background: #c9a313; /* deeper gold hover */
+  transform: scale(1.05);
+}

@@ -1,0 +1,125 @@
+.servicelist-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  font-family: 'Poppins', sans-serif;
+  color: #f9fafb; /* brighter, almost white */
+}
+
+.servicelist-container h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  color: #ffd447; /* bright gold for title */
+}
+
+/* Form */
+.service-form {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.service-form input {
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #111; /* darker font for readability */
+}
+
+.service-form button {
+  background: #96198d;
+  color: #fff;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.service-form button:hover {
+  background: #7a126e;
+  transform: scale(1.05);
+}
+
+/* Service list */
+.service-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.service-card {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.service-info {
+  flex: 1;
+}
+
+.service-info strong {
+  font-size: 1.2rem;
+  color: #0c1029; /* stronger white */
+}
+
+.service-info p {
+  margin: 0.2rem 0;
+  font-size: 1rem;
+  color: #04010c; /* brighter than #ddd */
+}
+
+/* Actions */
+.service-actions button {
+  margin-left: 0.5rem;
+  background: #ffd447; /* gold */
+  border: none;
+  color: #111;
+  padding: 0.5rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  font-weight: 500;
+}
+
+.service-actions button:hover {
+  transform: scale(1.05);
+}
+
+.service-actions .delete {
+  background: #ef4444;
+  color: white;
+}
+
+.service-actions .delete:hover {
+  background: #dc2626;
+}
+
+/* Edit mode */
+.service-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.service-edit input {
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111; /* dark text */
+}

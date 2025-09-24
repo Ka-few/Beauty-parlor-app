@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import "./ServiceList.css";
 
 export default function ServiceList({ token }) {
   const [services, setServices] = useState([]);
@@ -30,7 +31,8 @@ export default function ServiceList({ token }) {
   // Create new service
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!newTitle || !newDescription || !newPrice) return alert("All fields are required");
+    if (!newTitle || !newDescription || !newPrice)
+      return alert("All fields are required");
 
     try {
       const res = await fetch("http://127.0.0.1:5000/services", {
@@ -39,10 +41,10 @@ export default function ServiceList({ token }) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ 
-          title: newTitle, 
-          description: newDescription, 
-          price: Number(newPrice) 
+        body: JSON.stringify({
+          title: newTitle,
+          description: newDescription,
+          price: Number(newPrice),
         }),
       });
 
@@ -87,7 +89,8 @@ export default function ServiceList({ token }) {
 
   // Update service
   const handleUpdate = async (id) => {
-    if (!editingTitle || !editingDescription || !editingPrice) return alert("All fields are required");
+    if (!editingTitle || !editingDescription || !editingPrice)
+      return alert("All fields are required");
 
     try {
       const res = await fetch(`http://127.0.0.1:5000/services/${id}`, {
@@ -96,10 +99,10 @@ export default function ServiceList({ token }) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ 
-          title: editingTitle, 
-          description: editingDescription, 
-          price: parseFloat(editingPrice) 
+        body: JSON.stringify({
+          title: editingTitle,
+          description: editingDescription,
+          price: parseFloat(editingPrice),
         }),
       });
 
@@ -119,11 +122,11 @@ export default function ServiceList({ token }) {
   };
 
   return (
-    <div>
+    <div className="servicelist-container">
       <h2>Services</h2>
 
       {/* Create form */}
-      <form onSubmit={handleCreate}>
+      <form onSubmit={handleCreate} className="service-form">
         <input
           type="text"
           placeholder="Title"
@@ -149,11 +152,11 @@ export default function ServiceList({ token }) {
       </form>
 
       {/* Service list */}
-      <ul>
+      <ul className="service-list">
         {services.map((service) => (
-          <li key={service.id}>
+          <li key={service.id} className="service-card">
             {editingServiceId === service.id ? (
-              <>
+              <div className="service-edit">
                 <input
                   type="text"
                   value={editingTitle}
@@ -172,14 +175,29 @@ export default function ServiceList({ token }) {
                   onChange={(e) => setEditingPrice(e.target.value)}
                   placeholder="Price"
                 />
-                <button onClick={() => handleUpdate(service.id)}>Save</button>
-                <button onClick={() => setEditingServiceId(null)}>Cancel</button>
-              </>
+                <div className="service-actions">
+                  <button onClick={() => handleUpdate(service.id)}>Save</button>
+                  <button onClick={() => setEditingServiceId(null)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
             ) : (
               <>
-                <strong>{service.title}</strong> - {service.description} - Kshs: {service.price}
-                <button onClick={() => handleEdit(service)}>Edit</button>
-                <button onClick={() => handleDelete(service.id)}>Delete</button>
+                <div className="service-info">
+                  <strong>{service.title}</strong>
+                  <p>{service.description}</p>
+                  <p>Kshs: {service.price}</p>
+                </div>
+                <div className="service-actions">
+                  <button onClick={() => handleEdit(service)}>Edit</button>
+                  <button
+                    onClick={() => handleDelete(service.id)}
+                    className="delete"
+                  >
+                    Delete
+                  </button>
+                </div>
               </>
             )}
           </li>

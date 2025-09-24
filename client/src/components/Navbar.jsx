@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import "./Navbar.css";
 
 export default function Navbar({ customer, setCustomer, setToken }) {
   const navigate = useNavigate();
@@ -6,62 +7,46 @@ export default function Navbar({ customer, setCustomer, setToken }) {
   const handleLogout = () => {
     setCustomer(null);
     setToken(null);
-    localStorage.removeItem("token"); // clear saved token
+    localStorage.removeItem("token");
+    localStorage.removeItem("customer");
     navigate("/login");
   };
 
   return (
-    <nav className="bg-gray-800 p-4 text-white flex justify-between items-center">
-      <div className="flex space-x-4">
-        {/* Always visible */}
-        <Link to="/services" className="hover:underline">
-          Services
-        </Link>
-
-        {/* Visible to everyone, but admin has extra management access */}
-        <Link to="/stylists" className="hover:underline">
-          Stylists
-        </Link>
-
-        {/* Customer-only link */}
-        {customer && !customer.is_admin && (
-          <Link to="/my-bookings" className="hover:underline">
-            My Bookings
-          </Link>
+    <nav className="navbar">
+      <div className="links">
+        {!customer && (
+          <>
+            <Link to="/">Home</Link>
+            <Link to="/services">Services</Link>
+            <Link to="/register">Register</Link>
+            <Link to="/login">Login</Link>
+          </>
         )}
 
-        {/* Admin-only links */}
-        {customer?.is_admin && (
+        {customer && customer.is_admin && (
           <>
-            <Link to="/manage-services" className="hover:underline">
-              Manage Services
-            </Link>
-            <Link to="/manage-stylists" className="hover:underline">
-              Manage Stylists
-            </Link>
+            <Link to="/manage-services">Manage Services</Link>
+            <Link to="/stylists">Manage Stylists</Link>
+          </>
+        )}
+
+        {customer && !customer.is_admin && (
+          <>
+            <Link to="/">Home</Link>
+            <Link to="/services">Services</Link>
+            <Link to="/my-bookings">My Appointments</Link>
           </>
         )}
       </div>
 
-      <div className="flex space-x-4">
-        {customer ? (
+      <div className="right">
+        {customer && (
           <>
-            <span>Welcome, {customer.name}</span>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 px-3 py-1 rounded hover:bg-red-600"
-            >
+            <span className="welcome">Hi, {customer.name}</span>
+            <button className="logout" onClick={handleLogout}>
               Logout
             </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" className="hover:underline">
-              Login
-            </Link>
-            <Link to="/register" className="hover:underline">
-              Register
-            </Link>
           </>
         )}
       </div>

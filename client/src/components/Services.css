@@ -1,0 +1,91 @@
+.services {
+  padding: 2rem;
+  font-family: 'Poppins', sans-serif;
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+.services h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #96198d; /* purple to match navbar */
+  margin-bottom: 2rem;
+  text-align: center;
+  border-bottom: 3px solid rgba(227, 181, 27, 0.6); /* yellow accent underline */
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.service-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.service-card {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.service-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.service-card p {
+  color: #555;
+  margin: 0.25rem 0;
+}
+
+.service-card p.price {
+  font-weight: 700;
+  color: #e3b51b; /* yellow accent for price */
+  margin-top: 0.5rem;
+}
+
+.service-card select {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  transition: border 0.2s ease;
+}
+
+.service-card select:focus {
+  outline: none;
+  border-color: #96198d; /* purple focus */
+}
+
+.book-btn {
+  margin-top: 1rem;
+  align-self: flex-start;
+  background: #96198d;
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.book-btn:hover {
+  background: #7d1476;
+  transform: scale(1.05);
+}

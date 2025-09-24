@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import "./Bookings.css";
+
 
 export default function Bookings({ token, customer }) {
   const [services, setServices] = useState([]);
@@ -104,9 +106,10 @@ export default function Bookings({ token, customer }) {
   };
 
   return (
-    <div>
+  <div className="booking-container">
+    <div className="booking-form-wrapper">
       <h2>Book a Service</h2>
-      <form onSubmit={handleSubmit}>
+      <form className="booking-form" onSubmit={handleSubmit}>
         <div>
           <label>Service:</label>
           <select
@@ -146,8 +149,9 @@ export default function Bookings({ token, customer }) {
           />
         </div>
 
-        <button type="submit">Book</button>
+        <button className="book-btn" type="submit">Book</button>
       </form>
     </div>
-  );
+  </div>
+);
 }

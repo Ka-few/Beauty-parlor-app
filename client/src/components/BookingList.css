@@ -1,0 +1,63 @@
+/* BookingList.css */
+
+.booking-list-container {
+  padding: 2rem;
+  font-family: 'Poppins', sans-serif;
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+.booking-list-container h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #96198d;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border-bottom: 3px solid rgba(227, 181, 27, 0.6);
+  display: inline-block;
+  padding-bottom: 0.4rem;
+}
+
+.no-bookings {
+  text-align: center;
+  color: #555;
+  font-size: 1rem;
+  margin-top: 2rem;
+}
+
+.booking-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.booking-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.booking-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.booking-card strong {
+  color: #96198d;
+  font-weight: 600;
+}
+
+.booking-card p {
+  margin: 0.3rem 0;
+  color: #333;
+}
+
+.booking-date {
+  margin-top: 0.5rem;
+  font-weight: 600;
+  color: #e3b51b; /* yellow highlight for date */
+}

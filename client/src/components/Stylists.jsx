@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import "./StylistList.css"; // ✅ import styles
 
 export default function StylistList({ token }) {
   const [stylists, setStylists] = useState([]);
@@ -15,7 +16,7 @@ export default function StylistList({ token }) {
   const [editingBio, setEditingBio] = useState("");
   const [editingServiceIds, setEditingServiceIds] = useState([]);
 
-  // Fetch all stylists
+  // Fetch stylists
   const fetchStylists = async () => {
     try {
       const res = await fetch("http://127.0.0.1:5000/stylists", {
@@ -28,7 +29,7 @@ export default function StylistList({ token }) {
     }
   };
 
-  // Fetch all services (needed for dropdowns)
+  // Fetch services
   const fetchServices = async () => {
     try {
       const res = await fetch("http://127.0.0.1:5000/services", {
@@ -84,13 +85,11 @@ export default function StylistList({ token }) {
   // Delete stylist
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this stylist?")) return;
-
     try {
       const res = await fetch(`http://127.0.0.1:5000/stylists/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (res.ok) fetchStylists();
       else alert("Error deleting stylist");
     } catch (err) {
@@ -98,7 +97,7 @@ export default function StylistList({ token }) {
     }
   };
 
-  // Start editing
+  // Edit stylist
   const handleEdit = (stylist) => {
     setEditingStylistId(stylist.id);
     setEditingName(stylist.name);
@@ -139,7 +138,7 @@ export default function StylistList({ token }) {
     }
   };
 
-  // Toggle service selection (checkboxes)
+  // Toggle checkbox
   const toggleService = (serviceId, selectedList, setSelectedList) => {
     if (selectedList.includes(serviceId)) {
       setSelectedList(selectedList.filter((id) => id !== serviceId));
@@ -149,11 +148,11 @@ export default function StylistList({ token }) {
   };
 
   return (
-    <div>
+    <div className="stylist-list">
       <h2>Stylists</h2>
 
-      {/* Create form */}
-      <form onSubmit={handleCreate}>
+      {/* Create Form */}
+      <form onSubmit={handleCreate} className="stylist-form">
         <input
           type="text"
           placeholder="Name"
@@ -168,10 +167,10 @@ export default function StylistList({ token }) {
           onChange={(e) => setNewBio(e.target.value)}
         />
 
-        <div>
+        <div className="service-options">
           <label>Assign Services:</label>
           {services.map((service) => (
-            <label key={service.id} style={{ marginLeft: "10px" }}>
+            <label key={service.id}>
               <input
                 type="checkbox"
                 checked={newServiceIds.includes(service.id)}
@@ -187,10 +186,10 @@ export default function StylistList({ token }) {
         <button type="submit">Add Stylist</button>
       </form>
 
-      {/* Stylist list */}
-      <ul>
+      {/* Stylist Cards */}
+      <ul className="stylist-cards">
         {stylists.map((stylist) => (
-          <li key={stylist.id}>
+          <li key={stylist.id} className="stylist-card">
             {editingStylistId === stylist.id ? (
               <>
                 <input
@@ -231,8 +230,7 @@ export default function StylistList({ token }) {
                 <br />
                 <em>
                   Services:{" "}
-                  {stylist.services?.map((s) => s.title).join(", ") ||
-                    "No services"}
+                  {stylist.services?.map((s) => s.title).join(", ") || "No services"}
                 </em>
                 <br />
                 <button onClick={() => handleEdit(stylist)}>Edit</button>

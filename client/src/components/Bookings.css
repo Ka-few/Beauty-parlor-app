@@ -1,0 +1,86 @@
+/* Booking.css */
+
+.booking-container {
+  padding: 2rem;
+  font-family: 'Poppins', sans-serif;
+  background: #f9fafb;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.booking-form-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.booking-form-wrapper:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.booking-form-wrapper h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #96198d;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  border-bottom: 3px solid rgba(227, 181, 27, 0.6);
+  display: inline-block;
+  padding-bottom: 0.4rem;
+}
+
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.booking-form label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.3rem;
+  display: block;
+}
+
+.booking-form select,
+.booking-form input[type="datetime-local"] {
+  padding: 0.7rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  width: 100%;
+  transition: border 0.2s ease;
+}
+
+.booking-form select:focus,
+.booking-form input[type="datetime-local"]:focus {
+  outline: none;
+  border-color: #96198d;
+  box-shadow: 0 0 0 2px rgba(150, 25, 141, 0.2);
+}
+
+.book-btn {
+  margin-top: 0.5rem;
+  background: #96198d;
+  color: #fff;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  align-self: center;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.book-btn:hover {
+  background: #7d1476;
+  transform: scale(1.05);
+}

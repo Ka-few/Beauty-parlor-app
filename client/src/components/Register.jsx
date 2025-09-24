@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./Register.css"; // link the stylesheet
 
 export default function Register({ setCustomer }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false); // new state for admin flag
+  const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -13,7 +14,7 @@ export default function Register({ setCustomer }) {
     e.preventDefault();
     setError("");
 
-    const data = { name, phone, password, is_admin: isAdmin }; // include admin flag
+    const data = { name, phone, password, is_admin: isAdmin };
 
     try {
       const res = await fetch("http://127.0.0.1:5000/register", {
@@ -40,17 +41,20 @@ export default function Register({ setCustomer }) {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={handleRegister}>
+    <div className="register-container">
+      <form onSubmit={handleRegister} className="register-form">
+        <h2>Create an Account</h2>
+
+        {error && <p className="error">{error}</p>}
+
         <input
           type="text"
-          placeholder="Name"
+          placeholder="Full Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
+
         <input
           type="text"
           placeholder="Phone"
@@ -58,6 +62,7 @@ export default function Register({ setCustomer }) {
           onChange={(e) => setPhone(e.target.value)}
           required
         />
+
         <input
           type="password"
           placeholder="Password"
@@ -65,7 +70,8 @@ export default function Register({ setCustomer }) {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <div>
+
+        <div className="checkbox-group">
           <label>
             <input
               type="checkbox"
@@ -75,6 +81,7 @@ export default function Register({ setCustomer }) {
             Register as Admin
           </label>
         </div>
+
         <button type="submit">Register</button>
       </form>
     </div>

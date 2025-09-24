@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import "./Services.css"; // ✅ Import the CSS
 
 export default function Services({ token }) {
   const [services, setServices] = useState([]);
   const [selectedStylists, setSelectedStylists] = useState({});
   const navigate = useNavigate();
 
-  // Fetch all services with their associated stylists
+  // Fetch services
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -23,7 +24,6 @@ export default function Services({ token }) {
         console.error(err);
       }
     };
-
     if (token) fetchServices();
   }, [token]);
 
@@ -39,23 +39,21 @@ export default function Services({ token }) {
       alert("Please select a stylist for this service");
       return;
     }
-
-    // Navigate to bookings page with service and stylist preselected
     navigate(`/bookings?serviceId=${service.id}&stylistId=${stylistId}`);
   };
 
   return (
-    <div>
+    <div className="services">
       <h2>Our Services</h2>
       {services.length === 0 ? (
         <p>Loading services...</p>
       ) : (
-        <ul>
+        <ul className="service-list">
           {services.map((service) => (
-            <li key={service.id} style={{ marginBottom: "2rem" }}>
+            <li key={service.id} className="service-card">
               <h3>{service.title}</h3>
               <p>{service.description}</p>
-              <p>Price: Kshs: {service.price}</p>
+              <p className="price">Price: Kshs {service.price}</p>
 
               {service.stylists && service.stylists.length > 0 ? (
                 <select
@@ -73,7 +71,7 @@ export default function Services({ token }) {
                 <p>No stylists available</p>
               )}
 
-              <button onClick={() => handleBook(service)} style={{ marginLeft: "1rem" }}>
+              <button onClick={() => handleBook(service)} className="book-btn">
                 Book
               </button>
             </li>
