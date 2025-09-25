@@ -8,6 +8,7 @@
 #### Customer registration & login (JWT authentication)
 #### Browse available services
 #### Book appointments with stylists
+#### Role-based navigation (customer vs admin)
 #### Protected routes with session persistence
 #### Backend API deployed on Render
 #### Frontend deployed on Vercel
