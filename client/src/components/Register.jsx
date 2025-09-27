@@ -1,89 +1,89 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Register.css"; // link the stylesheet
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import "./Register.css";
 
-export default function Register({ setCustomer }) {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [error, setError] = useState("");
+export default function Register() {
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setError("");
+  // Validation schema
+  const validationSchema = Yup.object({
+    name: Yup.string().required("Full Name is required"),
+    phone: Yup.string()
+      .matches(/^[0-9]{10,15}$/, "Phone number must be 10–15 digits")
+      .required("Phone is required"),
+    password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+    isAdmin: Yup.boolean(),
+  });
 
-    const data = { name, phone, password, is_admin: isAdmin };
-
+  const handleSubmit = async (values, { setSubmitting, setErrors, resetForm }) => {
     try {
       const res = await fetch("https://beauty-parlor-app-5.onrender.com/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          name: values.name,
+          phone: values.phone,
+          password: values.password,
+          is_admin: values.isAdmin,
+        }),
       });
 
       const result = await res.json();
 
       if (!res.ok) {
-        setError(result.error || "Registration failed");
+        setErrors({ api: result.error || "Registration failed" });
         return;
       }
 
       if (result.customer) {
         alert("Registration successful! Please login.");
+        resetForm();
         navigate("/login");
       }
     } catch (err) {
       console.error(err);
-      setError("An error occurred");
+      setErrors({ api: "An error occurred. Please try again." });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <div className="register-container">
-      <form onSubmit={handleRegister} className="register-form">
-        <h2>Create an Account</h2>
+      <Formik
+        initialValues={{ name: "", phone: "", password: "", isAdmin: false }}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ isSubmitting, errors }) => (
+          <Form className="register-form">
+            <h2>Create an Account</h2>
 
-        {error && <p className="error">{error}</p>}
+            {errors.api && <p className="error">{errors.api}</p>}
 
-        <input
-          type="text"
-          placeholder="Full Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
+            <Field type="text" name="name" placeholder="Full Name" />
+            <ErrorMessage name="name" component="div" className="error" />
 
-        <input
-          type="text"
-          placeholder="Phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          required
-        />
+            <Field type="text" name="phone" placeholder="Phone" />
+            <ErrorMessage name="phone" component="div" className="error" />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+            <Field type="password" name="password" placeholder="Password" />
+            <ErrorMessage name="password" component="div" className="error" />
 
-        <div className="checkbox-group">
-          <label>
-            <input
-              type="checkbox"
-              checked={isAdmin}
-              onChange={(e) => setIsAdmin(e.target.checked)}
-            />
-            Register as Admin
-          </label>
-        </div>
+            <div className="checkbox-group">
+              <label>
+                <Field type="checkbox" name="isAdmin" />
+                Register as Admin
+              </label>
+            </div>
 
-        <button type="submit">Register</button>
-      </form>
+            <button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Registering..." : "Register"}
+            </button>
+          </Form>
+        )}
+      </Formik>
     </div>
   );
 }

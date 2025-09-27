@@ -9,13 +9,11 @@ export default function Services({ token }) {
   const [services, setServices] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch services
+  // Fetch services (public)
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch("https://beauty-parlor-app-5.onrender.com/services", {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const res = await fetch("https://beauty-parlor-app-5.onrender.com/services");
         if (res.ok) {
           const data = await res.json();
           setServices(data);
@@ -26,8 +24,9 @@ export default function Services({ token }) {
         console.error(err);
       }
     };
-    if (token) fetchServices();
-  }, [token]);
+
+    fetchServices();
+  }, []);
 
   return (
     <div className="services">
@@ -48,9 +47,15 @@ export default function Services({ token }) {
                   stylistId: Yup.string().required("Please select a stylist"),
                 })}
                 onSubmit={(values) => {
-                  navigate(
-                    `/bookings?serviceId=${service.id}&stylistId=${values.stylistId}`
-                  );
+                  if (!token) {
+                    // Redirect to login if not logged in
+                    navigate("/login");
+                  } else {
+                    // Proceed to booking
+                    navigate(
+                      `/bookings?serviceId=${service.id}&stylistId=${values.stylistId}`
+                    );
+                  }
                 }}
               >
                 {() => (

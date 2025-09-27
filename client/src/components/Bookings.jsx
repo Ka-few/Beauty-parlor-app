@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import "./Bookings.css";
 
 export default function Bookings({ token, customer }) {
   const location = useLocation();
@@ -62,7 +63,7 @@ export default function Bookings({ token, customer }) {
           onSubmit={async (values, { setSubmitting }) => {
             try {
               const res = await fetch(
-                "https://beauty-parlor-app-5.onrender.com/appointments",
+                "https://beauty-parlor-app-5.onrender.com/bookings",
                 {
                   method: "POST",
                   headers: {
@@ -111,8 +112,8 @@ export default function Bookings({ token, customer }) {
                 <ErrorMessage name="appointmentTime" component="div" className="error" />
               </div>
 
-              <button type="submit" className="book-btn" disabled={isSubmitting}>
-                {isSubmitting ? "Booking..." : "Book"}
+              <button className="book-btn" type="submit">
+                {customer ? "Book" : "Login to Book"}
               </button>
             </Form>
           )}

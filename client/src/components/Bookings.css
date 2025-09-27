@@ -1,37 +1,35 @@
-/* Booking.css */
-
 .booking-container {
   padding: 2rem;
   font-family: 'Poppins', sans-serif;
-  background: #f9fafb;
+  background: linear-gradient(135deg, #fdf7ff, #f9fafb);
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center; /* center vertically */
 }
 
 .booking-form-wrapper {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
-  padding: 2rem;
-  max-width: 500px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  max-width: 480px;
   width: 100%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .booking-form-wrapper:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  transform: translateY(-6px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
 }
 
 .booking-form-wrapper h2 {
-  font-size: 1.75rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #96198d;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.8rem;
   text-align: center;
-  border-bottom: 3px solid rgba(227, 181, 27, 0.6);
+  border-bottom: 3px solid rgba(227, 181, 27, 0.75);
   display: inline-block;
   padding-bottom: 0.4rem;
 }
@@ -39,48 +37,69 @@
 .booking-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .booking-form label {
   font-weight: 600;
-  color: #333;
-  margin-bottom: 0.3rem;
+  color: #444;
+  margin-bottom: 0.4rem;
   display: block;
+  font-size: 0.95rem;
 }
 
+.booking-form input[type="text"],
 .booking-form select,
 .booking-form input[type="datetime-local"] {
-  padding: 0.7rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #d0d0d0;
   font-size: 0.95rem;
   width: 100%;
-  transition: border 0.2s ease;
+  transition: all 0.2s ease;
+  background: #fafafa;
 }
 
-.booking-form select:focus,
-.booking-form input[type="datetime-local"]:focus {
+.booking-form input[type="text"]:read-only {
+  background: #f4f4f4;
+  color: #666;
+}
+
+.booking-form input:focus,
+.booking-form select:focus {
   outline: none;
   border-color: #96198d;
-  box-shadow: 0 0 0 2px rgba(150, 25, 141, 0.2);
+  box-shadow: 0 0 0 3px rgba(150, 25, 141, 0.2);
+  background: #fff;
+}
+
+.error {
+  font-size: 0.85rem;
+  color: #e63946;
+  margin-top: -0.6rem;
+  margin-bottom: 0.6rem;
 }
 
 .book-btn {
-  margin-top: 0.5rem;
-  background: #96198d;
+  margin-top: 0.8rem;
+  background: linear-gradient(135deg, #96198d, #7d1476);
   color: #fff;
-  padding: 0.7rem 1.5rem;
+  padding: 0.8rem 1.5rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 1.05rem;
+  font-weight: 600;
   align-self: center;
   transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .book-btn:hover {
-  background: #7d1476;
-  transform: scale(1.05);
+  background: linear-gradient(135deg, #7d1476, #5e0f58);
+  transform: translateY(-2px) scale(1.04);
+}
+
+.book-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }

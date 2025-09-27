@@ -92,7 +92,7 @@ class Me(Resource):
 
 # ---------------- SERVICES ---------------- #
 class ServiceList(Resource):
-    @jwt_required()
+    
     def get(self):
         services = Service.query.all()
         services_data = []

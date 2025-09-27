@@ -3,83 +3,74 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "./Login.css";
 
-export default function Login({ setCustomer, setToken }) {
+export default function Login({ setCustomer }) {
   const navigate = useNavigate();
 
-  // ✅ Yup validation schema
+  // Validation schema
   const validationSchema = Yup.object({
     phone: Yup.string()
-      .required("Phone is required")
-      .matches(/^\d{10}$/, "Phone must be 10 digits"),
-    password: Yup.string()
-      .required("Password is required")
-      .min(4, "Password must be at least 4 characters"),
+      .matches(/^[0-9]{10,15}$/, "Phone number must be 10–15 digits")
+      .required("Phone is required"),
+    password: Yup.string().required("Password is required"),
   });
 
-  // ✅ Handle form submission
-  const handleLogin = async (values, { setSubmitting, setStatus }) => {
+  const handleSubmit = async (values, { setSubmitting, setErrors, resetForm }) => {
     try {
       const res = await fetch("https://beauty-parlor-app-5.onrender.com/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          phone: values.phone,
+          password: values.password,
+        }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setCustomer(data.customer);
-        setToken(data.access_token);
-        localStorage.setItem("token", data.access_token);
-        navigate("/services");
-      } else {
-        const err = await res.json();
-        setStatus(err.error || "Login failed");
+      const result = await res.json();
+
+      if (!res.ok) {
+        setErrors({ api: result.error || "Login failed" });
+        return;
+      }
+
+      if (result.access_token && result.customer) {
+        localStorage.setItem("token", result.access_token);
+        setCustomer(result.customer);
+        resetForm();
+        navigate("/services"); // redirect to services after login
       }
     } catch (err) {
       console.error(err);
-      setStatus("Network error");
+      setErrors({ api: "An error occurred. Please try again." });
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Formik
-      initialValues={{ phone: "", password: "" }}
-      validationSchema={validationSchema}
-      onSubmit={handleLogin}
-    >
-      {({ isSubmitting, status }) => (
-        <Form className="login-form">
-          <h2 className="login-title">Login</h2>
+    <div className="login-container">
+      <Formik
+        initialValues={{ phone: "", password: "" }}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ isSubmitting, errors }) => (
+          <Form className="login-form">
+            <h2>Login</h2>
 
-          {/* Phone */}
-          <Field
-            type="text"
-            name="phone"
-            placeholder="Phone"
-            className="login-input"
-          />
-          <ErrorMessage name="phone" component="div" className="error" />
+            {errors.api && <p className="error">{errors.api}</p>}
 
-          {/* Password */}
-          <Field
-            type="password"
-            name="password"
-            placeholder="Password"
-            className="login-input"
-          />
-          <ErrorMessage name="password" component="div" className="error" />
+            <Field type="text" name="phone" placeholder="Phone" />
+            <ErrorMessage name="phone" component="div" className="error" />
 
-          {/* Submit button */}
-          <button type="submit" disabled={isSubmitting} className="login-button">
-            {isSubmitting ? "Logging in..." : "Login"}
-          </button>
+            <Field type="password" name="password" placeholder="Password" />
+            <ErrorMessage name="password" component="div" className="error" />
 
-          {/* Server / network error */}
-          {status && <p className="error">{status}</p>}
-        </Form>
-      )}
-    </Formik>
+            <button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Logging in..." : "Login"}
+            </button>
+          </Form>
+        )}
+      </Formik>
+    </div>
   );
 }

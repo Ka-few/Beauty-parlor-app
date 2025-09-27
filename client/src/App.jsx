@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Register from "./components/Register";
 import Login from "./components/Login";
@@ -8,13 +13,21 @@ import Stylists from "./components/Stylists";
 import Bookings from "./components/Bookings";
 import BookingList from "./components/BookingList";
 import ServiceList from "./components/ServiceList";
-// import StylistList from "./components/StylistList"; // Admin-only CRUD
 
 function App() {
   const [customer, setCustomer] = useState(null);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
 
-  // Auto-load logged-in customer with token
+  // ✅ Keep token in localStorage
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem("token", token);
+    } else {
+      localStorage.removeItem("token");
+    }
+  }, [token]);
+
+  // ✅ Fetch user details when token changes
   useEffect(() => {
     if (!token) return;
 
@@ -28,10 +41,12 @@ function App() {
           setCustomer(data.customer);
         } else {
           setCustomer(null);
+          setToken(null);
         }
       } catch (err) {
         console.error(err);
         setCustomer(null);
+        setToken(null);
       }
     };
 
@@ -55,41 +70,13 @@ function App() {
           element={<Login setCustomer={setCustomer} setToken={setToken} />}
         />
 
-        {/* Services: different for customer vs admin */}
-        <Route
-          path="/services"
-          element={
-            customer ? (
-              customer.is_admin ? (
-                <ServiceList token={token} />
-              ) : (
-                <Services token={token} />
-              )
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
+        {/* Services page: PUBLIC */}
+        <Route path="/services" element={<Services token={token} />} />
 
-        {/* Stylists: public list for all customers */}
-        <Route
-          path="/stylists"
-          element={customer ? <Stylists token={token} /> : <Navigate to="/login" />}
-        />
+        {/* Stylists page: PUBLIC */}
+        <Route path="/stylists" element={<Stylists token={token} />} />
 
-        {/* Admin-only stylist management */}
-        {/* <Route
-          path="/manage-stylists"
-          element={
-            customer?.is_admin ? (
-              <StylistList token={token} />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        /> */}
-
-        {/* Admin-only service management (direct link from navbar) */}
+        {/* Admin-only service management */}
         <Route
           path="/manage-services"
           element={
@@ -101,11 +88,15 @@ function App() {
           }
         />
 
-        {/* Customer bookings */}
+        {/* Customer bookings (protected) */}
         <Route
           path="/bookings"
           element={
-            customer ? <Bookings token={token} customer={customer} /> : <Navigate to="/login" />
+            customer ? (
+              <Bookings token={token} customer={customer} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
         <Route
@@ -114,7 +105,7 @@ function App() {
             customer ? (
               <BookingList token={token} customer={customer} />
             ) : (
-              <Navigate to="/login" />
+              <Navigate to="/login" replace />
             )
           }
         />
