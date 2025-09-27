@@ -13,7 +13,17 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///beauty_parlour.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["JWT_SECRET_KEY"] = "super-secret"  # change this in production!
 
-CORS(app, resources={r"/*": {"origins": "https://beauty-parlor-app-ztgj.vercel.app"}}, supports_credentials=True)
+
+CORS(
+    app,
+    resources={r"/*": {"origins": [
+        "http://localhost:5173",
+        "https://beauty-parlor-app-ztgj.vercel.app"
+    ]}},
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
 
 db.init_app(app)
 migrate = Migrate(app, db)
