@@ -1,157 +1,123 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import "./Bookings.css";
-
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 
 export default function Bookings({ token, customer }) {
-  const [services, setServices] = useState([]);
-  const [stylists, setStylists] = useState([]);
-  const [selectedService, setSelectedService] = useState("");
-  const [selectedStylist, setSelectedStylist] = useState("");
-  const [appointmentTime, setAppointmentTime] = useState("");
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Get serviceId from query string if present
+  const queryParams = new URLSearchParams(location.search);
+  const serviceId = queryParams.get("serviceId");
+  const stylistId = queryParams.get("stylistId");
+
+  const [service, setService] = useState(null);
+  const [stylist, setStylist] = useState(null);
+
+  // Fetch service & stylist details
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const serviceId = params.get("serviceId");
-    if (serviceId) setSelectedService(serviceId);
-  }, [location.search]);
-
-  // Fetch all services
-  useEffect(() => {
-    if (!token) return;
-
-    const fetchServices = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("https://beauty-parlor-app-5.onrender.com/services", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setServices(data);
-        } else {
-          console.error("Failed to fetch services:", res.status);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchServices();
-  }, [token]);
-
-  // Fetch stylists for the selected service
-  useEffect(() => {
-    if (!selectedService || !token) return;
-
-    const fetchStylists = async () => {
-      try {
-        const res = await fetch(
-          `https://beauty-parlor-app-5.onrender.com/services/${selectedService}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
+        if (serviceId) {
+          const res = await fetch(
+            `https://beauty-parlor-app-5.onrender.com/services/${serviceId}`,
+            { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            setService(data);
           }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setStylists(data.stylists || []);
+        }
+        if (stylistId) {
+          const res = await fetch(
+            `https://beauty-parlor-app-5.onrender.com/stylists/${stylistId}`,
+            { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            setStylist(data);
+          }
         }
       } catch (err) {
         console.error(err);
       }
     };
-    fetchStylists();
-  }, [selectedService, token]);
+    fetchData();
+  }, [serviceId, stylistId, token]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!customer) {
-      alert("You must be logged in to book a service.");
-      return;
-    }
-
-    if (!selectedService || !selectedStylist || !appointmentTime) {
-      alert("Please select a service, stylist, and date.");
-      return;
-    }
-
-    try {
-      const res = await fetch("https://beauty-parlor-app-5.onrender.com/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          customer_id: customer.id,
-          service_id: Number(selectedService),
-          stylist_id: Number(selectedStylist),
-          appointment_time: appointmentTime,
-        }),
-      });
-
-      if (res.ok) {
-        alert("Booking created successfully!");
-        navigate("/my-bookings");
-      } else {
-        const error = await res.json();
-        alert("Error: " + (error.error || "Something went wrong"));
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Network error, try again.");
-    }
-  };
+  if (!service || !stylist) {
+    return <p>Loading booking details...</p>;
+  }
 
   return (
-  <div className="booking-container">
-    <div className="booking-form-wrapper">
-      <h2>Book a Service</h2>
-      <form className="booking-form" onSubmit={handleSubmit}>
-        <div>
-          <label>Service:</label>
-          <select
-            value={selectedService}
-            onChange={(e) => setSelectedService(e.target.value)}
-          >
-            <option value="">--Select Service--</option>
-            {services.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.title}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="booking-container">
+      <div className="booking-form-wrapper">
+        <h2>Confirm Your Booking</h2>
 
-        <div>
-          <label>Stylist:</label>
-          <select
-            value={selectedStylist}
-            onChange={(e) => setSelectedStylist(e.target.value)}
-          >
-            <option value="">--Select Stylist--</option>
-            {stylists.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Formik
+          initialValues={{ appointmentTime: "" }}
+          validationSchema={Yup.object({
+            appointmentTime: Yup.string().required("Please select a date and time"),
+          })}
+          onSubmit={async (values, { setSubmitting }) => {
+            try {
+              const res = await fetch(
+                "https://beauty-parlor-app-5.onrender.com/appointments",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    customer_id: customer.id,
+                    service_id: service.id,
+                    stylist_id: stylist.id,
+                    appointment_time: values.appointmentTime,
+                  }),
+                }
+              );
 
-        <div>
-          <label>Appointment Date:</label>
-          <input
-            type="datetime-local"
-            value={appointmentTime}
-            onChange={(e) => setAppointmentTime(e.target.value)}
-          />
-        </div>
+              if (res.ok) {
+                alert("Booking successful!");
+                navigate("/my-bookings");
+              } else {
+                const error = await res.json();
+                alert(error.error || "Booking failed");
+              }
+            } catch (err) {
+              console.error(err);
+              alert("An error occurred while booking.");
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+        >
+          {({ isSubmitting }) => (
+            <Form className="booking-form">
+              <div>
+                <label>Service:</label>
+                <input type="text" value={service.title} readOnly />
+              </div>
 
-        <button className="book-btn" type="submit">Book</button>
-      </form>
+              <div>
+                <label>Stylist:</label>
+                <input type="text" value={stylist.name} readOnly />
+              </div>
+
+              <div>
+                <label>Appointment Date:</label>
+                <Field type="datetime-local" name="appointmentTime" />
+                <ErrorMessage name="appointmentTime" component="div" className="error" />
+              </div>
+
+              <button type="submit" className="book-btn" disabled={isSubmitting}>
+                {isSubmitting ? "Booking..." : "Book"}
+              </button>
+            </Form>
+          )}
+        </Formik>
+      </div>
     </div>
-  </div>
-);
+  );
 }

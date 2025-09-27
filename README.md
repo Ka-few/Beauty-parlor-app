@@ -1,8 +1,8 @@
 # Beauty-parlor-app
 ## By Francis Njoroge and Beverly Ndukwe
 
-### A full-stack web application for managing beauty parlour services and customer appointments.
-### Built with React (Vite) for the frontend and Flask (Python) for the backend.
+A full-stack web application for managing beauty parlour services and customer appointments.
+Built with React (Vite) for the frontend and Flask (Python) for the backend.
 
 ## Features
 #### Customer registration & login (JWT authentication)

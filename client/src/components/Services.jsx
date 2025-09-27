@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Services.css"; // 
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+
+import "./Services.css";
 
 export default function Services({ token }) {
   const [services, setServices] = useState([]);
-  const [selectedStylists, setSelectedStylists] = useState({});
   const navigate = useNavigate();
 
   // Fetch services
@@ -27,21 +29,6 @@ export default function Services({ token }) {
     if (token) fetchServices();
   }, [token]);
 
-  // Handle stylist selection
-  const handleStylistChange = (serviceId, stylistId) => {
-    setSelectedStylists(prev => ({ ...prev, [serviceId]: stylistId }));
-  };
-
-  // Handle booking
-  const handleBook = (service) => {
-    const stylistId = selectedStylists[service.id];
-    if (!stylistId) {
-      alert("Please select a stylist for this service");
-      return;
-    }
-    navigate(`/bookings?serviceId=${service.id}&stylistId=${stylistId}`);
-  };
-
   return (
     <div className="services">
       <h2>Our Services</h2>
@@ -55,25 +42,45 @@ export default function Services({ token }) {
               <p>{service.description}</p>
               <p className="price">Price: Kshs {service.price}</p>
 
-              {service.stylists && service.stylists.length > 0 ? (
-                <select
-                  value={selectedStylists[service.id] || ""}
-                  onChange={(e) => handleStylistChange(service.id, e.target.value)}
-                >
-                  <option value="">Select a stylist</option>
-                  {service.stylists.map((stylist) => (
-                    <option key={stylist.id} value={stylist.id}>
-                      {stylist.name}
-                    </option>
-                  ))}
-                </select>
-              ) : (
-                <p>No stylists available</p>
-              )}
+              <Formik
+                initialValues={{ stylistId: "" }}
+                validationSchema={Yup.object({
+                  stylistId: Yup.string().required("Please select a stylist"),
+                })}
+                onSubmit={(values) => {
+                  navigate(
+                    `/bookings?serviceId=${service.id}&stylistId=${values.stylistId}`
+                  );
+                }}
+              >
+                {() => (
+                  <Form>
+                    {service.stylists && service.stylists.length > 0 ? (
+                      <div>
+                        <Field as="select" name="stylistId">
+                          <option value="">Select a stylist</option>
+                          {service.stylists.map((stylist) => (
+                            <option key={stylist.id} value={stylist.id}>
+                              {stylist.name}
+                            </option>
+                          ))}
+                        </Field>
+                        <ErrorMessage
+                          name="stylistId"
+                          component="div"
+                          className="error"
+                        />
+                      </div>
+                    ) : (
+                      <p>No stylists available</p>
+                    )}
 
-              <button onClick={() => handleBook(service)} className="book-btn">
-                Book
-              </button>
+                    <button type="submit" className="book-btn">
+                      Book
+                    </button>
+                  </Form>
+                )}
+              </Formik>
             </li>
           ))}
         </ul>
