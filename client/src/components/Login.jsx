@@ -3,7 +3,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "./Login.css";
 
-export default function Login({ setCustomer }) {
+export default function Login({ setCustomer, setToken }) {
   const navigate = useNavigate();
 
   // Validation schema
@@ -33,8 +33,16 @@ export default function Login({ setCustomer }) {
       }
 
       if (result.access_token && result.customer) {
+        // Store token for later requests
         localStorage.setItem("token", result.access_token);
-        setCustomer(result.customer);
+        setToken(result.access_token);
+
+        // Ensure we include is_admin from backend
+        setCustomer({
+          ...result.customer,
+          is_admin: result.customer.is_admin ?? false,
+        });
+
         resetForm();
         navigate("/services"); // redirect to services after login
       }

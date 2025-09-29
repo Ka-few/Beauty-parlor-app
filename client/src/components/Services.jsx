@@ -1,94 +1,146 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { useFormik } from "formik";
 import * as Yup from "yup";
+import './Services.css';
 
-import "./Services.css";
-
-export default function Services({ token }) {
+export default function Services({ user, token }) {
   const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Fetch services (public)
+  // Fetch services
   useEffect(() => {
     const fetchServices = async () => {
       try {
         const res = await fetch("https://beauty-parlor-app-5.onrender.com/services");
-        if (res.ok) {
-          const data = await res.json();
-          setServices(data);
-        } else {
-          console.error("Failed to fetch services:", res.status);
-        }
+        if (!res.ok) throw new Error("Failed to fetch services");
+        const data = await res.json();
+        setServices(data);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching services:", err);
+        setError("Could not load services. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
-
     fetchServices();
   }, []);
 
-  return (
-    <div className="services">
+  // Handle booking
+  const handleBooking = (serviceId) => {
+    if (!user) {
+      navigate("/login"); // guest → login
+    } else if (!user.is_admin) {
+      navigate(`/bookings?serviceId=${serviceId}`); // customer → bookings
+    }
+  };
+
+  // Admin formik form
+  const formik = useFormik({
+    initialValues: { name: "", description: "", price: "" },
+    validationSchema: Yup.object({
+      name: Yup.string().required("Required"),
+      description: Yup.string().required("Required"),
+      price: Yup.number().positive().required("Required"),
+    }),
+    onSubmit: async (values, { resetForm }) => {
+      try {
+        const res = await fetch("https://beauty-parlor-app-5.onrender.com/services", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(values),
+        });
+        if (!res.ok) throw new Error("Failed to add service");
+
+        resetForm();
+        const updated = await fetch("https://beauty-parlor-app-5.onrender.com/services");
+        setServices(await updated.json());
+      } catch (err) {
+        console.error("Error adding service:", err);
+      }
+    },
+  });
+
+  if (loading) return <p>Loading services...</p>;
+  if (error) return <p className="error">{error}</p>;
+
+ return (
+    <div className="services-container">
       <h2>Our Services</h2>
+
+      {/* Admin-only add service form */}
+      {user?.is_admin && (
+        <form onSubmit={formik.handleSubmit} className="add-service-form">
+          <h3>Add New Service</h3>
+
+          <input
+            type="text"
+            name="name"
+            placeholder="Service Name"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.name}
+          />
+          {formik.touched.name && formik.errors.name && (
+            <p className="error">{formik.errors.name}</p>
+          )}
+
+          <textarea
+            name="description"
+            placeholder="Service Description"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.description}
+          />
+          {formik.touched.description && formik.errors.description && (
+            <p className="error">{formik.errors.description}</p>
+          )}
+
+          <input
+            type="number"
+            name="price"
+            placeholder="Price (Ksh)"
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            value={formik.values.price}
+          />
+          {formik.touched.price && formik.errors.price && (
+            <p className="error">{formik.errors.price}</p>
+          )}
+
+          <button type="submit" className="btn">
+            Add Service
+          </button>
+        </form>
+      )}
+
+      {/* Services list */}
       {services.length === 0 ? (
-        <p>Loading services...</p>
+        <p className="no-services">No services available</p>
       ) : (
-        <ul className="service-list">
+        <div className="service-list">
           {services.map((service) => (
-            <li key={service.id} className="service-card">
+            <div key={service.id} className="service-card">
               <h3>{service.title}</h3>
               <p>{service.description}</p>
-              <p className="price">Price: Kshs {service.price}</p>
+              <p className="service-price">Ksh {service.price}</p>
 
-              <Formik
-                initialValues={{ stylistId: "" }}
-                validationSchema={Yup.object({
-                  stylistId: Yup.string().required("Please select a stylist"),
-                })}
-                onSubmit={(values) => {
-                  if (!token) {
-                    // Redirect to login if not logged in
-                    navigate("/login");
-                  } else {
-                    // Proceed to booking
-                    navigate(
-                      `/bookings?serviceId=${service.id}&stylistId=${values.stylistId}`
-                    );
-                  }
-                }}
-              >
-                {() => (
-                  <Form>
-                    {service.stylists && service.stylists.length > 0 ? (
-                      <div>
-                        <Field as="select" name="stylistId">
-                          <option value="">Select a stylist</option>
-                          {service.stylists.map((stylist) => (
-                            <option key={stylist.id} value={stylist.id}>
-                              {stylist.name}
-                            </option>
-                          ))}
-                        </Field>
-                        <ErrorMessage
-                          name="stylistId"
-                          component="div"
-                          className="error"
-                        />
-                      </div>
-                    ) : (
-                      <p>No stylists available</p>
-                    )}
-
-                    <button type="submit" className="book-btn">
-                      Book
-                    </button>
-                  </Form>
-                )}
-              </Formik>
-            </li>
+              {!user?.is_admin && (
+                <button
+                  onClick={() => handleBooking(service.id)}
+                  className="book-btn"
+                >
+                  Book Now
+                </button>
+              )}
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

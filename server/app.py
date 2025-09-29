@@ -218,7 +218,7 @@ class StylistListResource(Resource):
         return stylist.to_dict(rules=("-services.stylists", "-bookings.stylist")), 201
 
 class StylistResource(Resource):
-    @jwt_required()
+    # @jwt_required()
     def get(self, stylist_id):
         stylist = Stylist.query.get_or_404(stylist_id)
         return stylist.to_dict(rules=("-services.stylists", "-bookings.stylist")), 200

@@ -7,12 +7,12 @@ export default function Navbar({ customer, setCustomer }) {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setCustomer(null);
-    navigate("/login");
+    navigate("/services");
   };
 
   return (
     <nav className="navbar">
-      <h1 className="logo">💇 Beauty Parlor</h1>
+      <h1 className="logo">Beauty Parlour</h1>
 
       <ul className="nav-links">
         {!customer && (
@@ -31,23 +31,29 @@ export default function Navbar({ customer, setCustomer }) {
             <li>
               <Link to="/services">Services</Link>
             </li>
-            <li>
-              <Link to="/stylists">Stylists</Link>
-            </li>
-            <li>
-              <Link to="/bookings">Book Now</Link>
-            </li>
-            <li>
-              <Link to="/my-bookings">My Bookings</Link>
-            </li>
 
-            {customer.is_admin && (
+            {/* Admin-only links */}
+            {customer.is_admin ? (
+              <>
+                <li>
+                  <Link to="/stylists">Stylists</Link>
+                </li>
+                <li>
+                  <Link to="/manage-services">Manage Services</Link>
+                </li>
+              </>
+            ) : (
+              // Normal customer-only link
               <li>
-                <Link to="/manage-services">Manage Services</Link>
+                <Link to="/my-bookings">My Bookings</Link>
               </li>
             )}
 
-            <li className="welcome">Welcome, {customer.name} 👋</li>
+            <li className="welcome">
+              Welcome, {customer.name}{" "}
+              {customer.is_admin && <span className="admin-badge">👑</span>}
+            </li>
+
             <li>
               <button className="logout-btn" onClick={handleLogout}>
                 Logout

@@ -1,5 +1,9 @@
 /* Navbar.css */
 
+* {
+  box-sizing: border-box; /* ensures padding/margin don't cause overflow */
+}
+
 .navbar {
   position: sticky;
   top: 0;
@@ -11,73 +15,97 @@
   align-items: center;
 
   padding: 0.8rem 2rem;
-  margin-bottom: 1rem;
+  margin: 0; /* remove bottom margin to prevent overflow */
 
-  /* Less transparent, purple glass */
-  background: rgba(150, 25, 141, 0.85);
+  background: rgba(150, 25, 141, 0.9); /* Purple glass */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 
   border-radius: 0 0 16px 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+
+  overflow-x: hidden; /* prevent horizontal overflow */
 }
 
+/* Logo */
 .navbar-logo {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 700;
-  color: #e3b51b; /* Gold */
+  color: #ffd700; /* Bright gold */
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .navbar-logo:hover {
-  color: #fff5c0; /* Soft gold hover */
+  color: #fff3a3; /* Softer glowing gold */
 }
 
+/* Navigation links */
 .nav-links {
   display: flex;
   gap: 1.5rem;
   align-items: center;
+  flex-wrap: wrap; /* wrap links if screen is small */
 }
 
 .nav-links a {
   font-size: 1rem;
-  font-weight: 500;
-  color: #f5e8c7; /* Light gold */
+  font-weight: 600;
+  color: #ffe27a; /* Soft golden */
   text-decoration: none;
   padding: 0.4rem 0.8rem;
-
   border-radius: 8px;
   transition: all 0.3s ease;
+  white-space: nowrap; /* prevent breaking mid-word */
 }
 
 .nav-links a:hover {
   background: rgba(227, 181, 27, 0.15); /* Gold tint hover */
-  color: #ffd700; /* Brighter gold */
+  color: #ffd700; /* Bright gold */
 }
 
+/* User greeting */
 .nav-user {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: #ffe27a; /* Soft golden text */
+  color: #ffd966; /* Medium gold */
   margin-right: 1rem;
 }
 
 /* Logout button */
 .logout-btn {
-  background: #e3b51b; /* Gold */
-  color: #96198d;     /* Purple text */
-  border: none;
+  background: transparent;
+  border: 2px solid #ffd700; /* Gold outline */
+  color: #ffd700; /* Gold text */
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 600;
 }
 
 .logout-btn:hover {
-  background: #ffd700;
-  color: #6c0f64; /* Darker purple */
+  background: #ffd700; /* Solid gold on hover */
+  color: #96198d; /* Purple text */
   transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.8rem 1rem;
+  }
+
+  .nav-links {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .nav-user {
+    margin: 0.5rem 0;
+  }
 }

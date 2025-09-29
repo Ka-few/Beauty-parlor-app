@@ -16,20 +16,15 @@ import ServiceList from "./components/ServiceList";
 
 function App() {
   const [customer, setCustomer] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [loading, setLoading] = useState(true);
 
-  // ✅ Keep token in localStorage
+  // Auto-load logged-in customer with token
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("token", token);
-    } else {
-      localStorage.removeItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
     }
-  }, [token]);
-
-  // ✅ Fetch user details when token changes
-  useEffect(() => {
-    if (!token) return;
 
     const fetchMe = async () => {
       try {
@@ -42,11 +37,13 @@ function App() {
         } else {
           setCustomer(null);
           setToken(null);
+          localStorage.removeItem("token");
         }
       } catch (err) {
-        console.error(err);
+        console.error("Auth check failed:", err);
         setCustomer(null);
-        setToken(null);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -55,7 +52,7 @@ function App() {
 
   return (
     <Router>
-      <Navbar customer={customer} setCustomer={setCustomer} setToken={setToken} />
+      <Navbar customer={customer} setCustomer={setCustomer} />
       <Routes>
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/services" />} />
@@ -71,16 +68,18 @@ function App() {
         />
 
         {/* Services page: PUBLIC */}
-        <Route path="/services" element={<Services token={token} />} />
+        <Route path="/services" element={<Services user={customer} token={token} />} />
 
-        {/* Stylists page: PUBLIC */}
+        {/* Stylists page: only visible to admin in Navbar */}
         <Route path="/stylists" element={<Stylists token={token} />} />
 
         {/* Admin-only service management */}
         <Route
           path="/manage-services"
           element={
-            customer?.is_admin ? (
+            loading ? (
+              <p>Loading...</p>
+            ) : customer?.is_admin ? (
               <ServiceList token={token} />
             ) : (
               <Navigate to="/login" />
@@ -92,7 +91,9 @@ function App() {
         <Route
           path="/bookings"
           element={
-            customer ? (
+            loading ? (
+              <p>Loading...</p>
+            ) : customer ? (
               <Bookings token={token} customer={customer} />
             ) : (
               <Navigate to="/login" replace />
@@ -102,7 +103,9 @@ function App() {
         <Route
           path="/my-bookings"
           element={
-            customer ? (
+            loading ? (
+              <p>Loading...</p>
+            ) : customer ? (
               <BookingList token={token} customer={customer} />
             ) : (
               <Navigate to="/login" replace />

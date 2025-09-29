@@ -1,52 +1,53 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "./Bookings.css";
 
 export default function Bookings({ token, customer }) {
-  const location = useLocation();
   const navigate = useNavigate();
 
-  const queryParams = new URLSearchParams(location.search);
-  const serviceId = queryParams.get("serviceId");
-  const stylistId = queryParams.get("stylistId");
+  const [services, setServices] = useState([]);
+  const [stylists, setStylists] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [service, setService] = useState(null);
-  const [stylist, setStylist] = useState(null);
+  // Redirect to login if not logged in
+  useEffect(() => {
+    if (!token || !customer) {
+      navigate("/login");
+    }
+  }, [token, customer, navigate]);
 
-  // Fetch service & stylist details
+  // Fetch services and stylists
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (serviceId) {
-          const res = await fetch(
-            `https://beauty-parlor-app-5.onrender.com/services/${serviceId}`,
-            { headers: token ? { Authorization: `Bearer ${token}` } : {} }
-          );
-          if (res.ok) {
-            const data = await res.json();
-            setService(data);
-          }
+        const serviceRes = await fetch(
+          "https://beauty-parlor-app-5.onrender.com/services",
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+        );
+        const stylistRes = await fetch(
+          "https://beauty-parlor-app-5.onrender.com/stylists",
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+        );
+
+        if (serviceRes.ok) {
+          setServices(await serviceRes.json());
         }
-        if (stylistId) {
-          const res = await fetch(
-            `https://beauty-parlor-app-5.onrender.com/stylists/${stylistId}`,
-            { headers: token ? { Authorization: `Bearer ${token}` } : {} }
-          );
-          if (res.ok) {
-            const data = await res.json();
-            setStylist(data);
-          }
+        if (stylistRes.ok) {
+          setStylists(await stylistRes.json());
         }
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchData();
-  }, [serviceId, stylistId, token]);
 
-  if (!service || !stylist) {
+    fetchData();
+  }, [token]);
+
+  if (loading) {
     return <p>Loading booking details...</p>;
   }
 
@@ -56,11 +57,18 @@ export default function Bookings({ token, customer }) {
         <h2>Confirm Your Booking</h2>
 
         <Formik
-          initialValues={{ appointmentTime: "" }}
+          initialValues={{ service: "", stylist: "", appointmentTime: "" }}
           validationSchema={Yup.object({
+            service: Yup.string().required("Please select a service"),
+            stylist: Yup.string().required("Please select a stylist"),
             appointmentTime: Yup.string().required("Please select a date and time"),
           })}
           onSubmit={async (values, { setSubmitting }) => {
+            if (!customer || !token) {
+              navigate("/login");
+              return;
+            }
+
             try {
               const res = await fetch(
                 "https://beauty-parlor-app-5.onrender.com/bookings",
@@ -71,9 +79,8 @@ export default function Bookings({ token, customer }) {
                     Authorization: `Bearer ${token}`,
                   },
                   body: JSON.stringify({
-                    customer_id: customer.id,
-                    service_id: service.id,
-                    stylist_id: stylist.id,
+                    service_id: Number(values.service),
+                    stylist_id: Number(values.stylist),
                     appointment_time: values.appointmentTime,
                   }),
                 }
@@ -94,29 +101,61 @@ export default function Bookings({ token, customer }) {
             }
           }}
         >
-          {({ isSubmitting }) => (
-            <Form className="booking-form">
-              <div>
-                <label>Service:</label>
-                <input type="text" value={service.title} readOnly />
-              </div>
+          {({ values, isSubmitting }) => {
+            // Filter stylists by selected service
+            const filteredStylists = stylists.filter((stylist) =>
+              stylist.services.some(
+                (service) => service.id === Number(values.service)
+              )
+            );
 
-              <div>
-                <label>Stylist:</label>
-                <input type="text" value={stylist.name} readOnly />
-              </div>
+            return (
+              <Form className="booking-form">
+                {/* Service dropdown */}
+                <div>
+                  <label>Service:</label>
+                  <Field as="select" name="service" className="border rounded p-2 w-full mb-2">
+                    <option value="">Select Service</option>
+                    {services.map((service) => (
+                      <option key={service.id} value={service.id}>
+                        {service.title} – Ksh {service.price}
+                      </option>
+                    ))}
+                  </Field>
+                  <ErrorMessage name="service" component="div" className="error" />
+                </div>
 
-              <div>
-                <label>Appointment Date:</label>
-                <Field type="datetime-local" name="appointmentTime" />
-                <ErrorMessage name="appointmentTime" component="div" className="error" />
-              </div>
+                {/* Stylist dropdown (filtered by service) */}
+                <div>
+                  <label>Stylist:</label>
+                  <Field as="select" name="stylist" className="border rounded p-2 w-full mb-2">
+                    <option value="">Select Stylist</option>
+                    {filteredStylists.map((stylist) => (
+                      <option key={stylist.id} value={stylist.id}>
+                        {stylist.name}
+                      </option>
+                    ))}
+                  </Field>
+                  <ErrorMessage name="stylist" component="div" className="error" />
+                </div>
 
-              <button className="book-btn" type="submit">
-                {customer ? "Book" : "Login to Book"}
-              </button>
-            </Form>
-          )}
+                {/* Appointment date */}
+                <div>
+                  <label>Appointment Date:</label>
+                  <Field type="datetime-local" name="appointmentTime" />
+                  <ErrorMessage
+                    name="appointmentTime"
+                    component="div"
+                    className="error"
+                  />
+                </div>
+
+                <button className="book-btn" type="submit" disabled={isSubmitting}>
+                  Book
+                </button>
+              </Form>
+            );
+          }}
         </Formik>
       </div>
     </div>
