@@ -60,6 +60,76 @@
   font-size: 1.05rem;
 }
 
+.add-service-form {
+  background: rgba(255, 255, 255, 0.95); /* subtle white glass */
+  padding: 1.8rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  margin-bottom: 2rem;
+  max-width: 500px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.add-service-form h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #96198d; /* purple heading */
+  text-align: center;
+  margin-bottom: 1rem;
+  border-bottom: 3px solid rgba(227, 181, 27, 0.6); /* gold underline */
+  padding-bottom: 0.4rem;
+  display: inline-block;
+}
+
+.add-service-form input,
+.add-service-form textarea {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  width: 100%;
+  font-family: 'Poppins', sans-serif;
+}
+
+.add-service-form input:focus,
+.add-service-form textarea:focus {
+  outline: none;
+  border-color: #96198d; /* purple focus */
+  box-shadow: 0 0 8px rgba(150, 25, 141, 0.3);
+}
+
+.add-service-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.add-service-form .error {
+  color: #e53e3e; /* red for errors */
+  font-size: 0.85rem;
+}
+
+.add-service-form .btn {
+  background: #96198d; /* purple button */
+  color: #fff;
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  align-self: center; /* center the button */
+}
+
+.add-service-form .btn:hover {
+  background: #7d1476;
+  transform: scale(1.05);
+}
+
 .book-btn {
   margin-top: 1rem;
   align-self: center;
