@@ -1,10 +1,12 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { useState } from "react";
 import "./Register.css";
 
 export default function Register() {
   const navigate = useNavigate();
+  const [alert, setAlert] = useState(null); // { type: "success"|"error", message: "" }
 
   // Validation schema
   const validationSchema = Yup.object({
@@ -12,11 +14,13 @@ export default function Register() {
     phone: Yup.string()
       .matches(/^[0-9]{10,15}$/, "Phone number must be 10–15 digits")
       .required("Phone is required"),
-    password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+    password: Yup.string()
+      .min(6, "Password must be at least 6 characters")
+      .required("Password is required"),
     isAdmin: Yup.boolean(),
   });
 
-  const handleSubmit = async (values, { setSubmitting, setErrors, resetForm }) => {
+  const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
       const res = await fetch("https://beauty-parlor-app-5.onrender.com/register", {
         method: "POST",
@@ -32,18 +36,20 @@ export default function Register() {
       const result = await res.json();
 
       if (!res.ok) {
-        setErrors({ api: result.error || "Registration failed" });
+        setAlert({ type: "error", message: result.error || "Registration failed" });
         return;
       }
 
       if (result.customer) {
-        alert("Registration successful! Please login.");
+        setAlert({ type: "success", message: "✅ Registration successful! Redirecting to login..." });
         resetForm();
-        navigate("/login");
+
+        // Redirect after showing the message
+        setTimeout(() => navigate("/login"), 2500);
       }
     } catch (err) {
       console.error(err);
-      setErrors({ api: "An error occurred. Please try again." });
+      setAlert({ type: "error", message: "An error occurred. Please try again." });
     } finally {
       setSubmitting(false);
     }
@@ -51,16 +57,20 @@ export default function Register() {
 
   return (
     <div className="register-container">
+      {alert && (
+        <div className={`alert ${alert.type === "error" ? "alert-error" : "alert-success"}`}>
+          {alert.message}
+        </div>
+      )}
+
       <Formik
         initialValues={{ name: "", phone: "", password: "", isAdmin: false }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
-        {({ isSubmitting, errors }) => (
+        {({ isSubmitting }) => (
           <Form className="register-form">
             <h2>Create an Account</h2>
-
-            {errors.api && <p className="error">{errors.api}</p>}
 
             <Field type="text" name="name" placeholder="Full Name" />
             <ErrorMessage name="name" component="div" className="error" />
@@ -81,6 +91,11 @@ export default function Register() {
             <button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Registering..." : "Register"}
             </button>
+
+            <p className="register-message">
+              Already have an account?
+              <Link to="/login"> Login here</Link>
+            </p>
           </Form>
         )}
       </Formik>

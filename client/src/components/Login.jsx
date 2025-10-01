@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "./Login.css";
@@ -65,7 +65,8 @@ export default function Login({ setCustomer, setToken }) {
           <Form className="login-form">
             <h2>Login</h2>
 
-            {errors.api && <p className="error">{errors.api}</p>}
+            {/* API error message */}
+            {errors.api && <div className="alert-error">⚠️ {errors.api}</div>}
 
             <Field type="text" name="phone" placeholder="Phone" />
             <ErrorMessage name="phone" component="div" className="error" />
@@ -76,6 +77,12 @@ export default function Login({ setCustomer, setToken }) {
             <button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Logging in..." : "Login"}
             </button>
+
+            {/* Friendly register/login message */}
+            <p className="login-message">
+              Don’t have an account?
+              <Link to="/register"> Register here</Link>
+            </p>
           </Form>
         )}
       </Formik>

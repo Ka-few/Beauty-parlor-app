@@ -4,11 +4,20 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import './Services.css';
 
-export default function Services({ user, token }) {
+export default function Services({ user: propUser, token: propToken }) {
+  const navigate = useNavigate();
+
+  // Restore user + token from localStorage if not passed as props
+  const [token, setToken] = useState(() => propToken || localStorage.getItem("token"));
+  const [user, setUser] = useState(() => {
+    if (propUser) return propUser;
+    const saved = localStorage.getItem("customer");
+    return saved ? JSON.parse(saved) : null;
+  });
+
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   // Fetch services
   useEffect(() => {
@@ -69,7 +78,7 @@ export default function Services({ user, token }) {
   if (loading) return <p>Loading services...</p>;
   if (error) return <p className="error">{error}</p>;
 
- return (
+  return (
     <div className="services-container">
       <h2>Our Services</h2>
 

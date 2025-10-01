@@ -16,6 +16,7 @@
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.1",
     "router": "^2.2.0",
+    "sweetalert2": "^11.23.0",
     "yup": "^1.7.1"
   },
   "devDependencies": {

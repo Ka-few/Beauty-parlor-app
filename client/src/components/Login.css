@@ -60,3 +60,22 @@
   margin-top: -8px;
   margin-bottom: 1rem;
 }
+
+.login-message {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.login-message a {
+  color: #ff5722;
+  font-weight: bold;
+  text-decoration: none;
+  margin-left: 5px;
+  transition: color 0.3s ease;
+}
+
+.login-message a:hover {
+  color: #ff9800;
+  text-decoration: underline;
+}

@@ -2,10 +2,19 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import Swal from "sweetalert2";
 import "./Bookings.css";
 
-export default function Bookings({ token, customer }) {
+export default function Bookings({ token: propToken, customer: propCustomer }) {
   const navigate = useNavigate();
+
+  // Restore token/customer from localStorage if not passed as props
+  const [token, setToken] = useState(() => propToken || localStorage.getItem("token"));
+  const [customer, setCustomer] = useState(() => {
+    if (propCustomer) return propCustomer;
+    const saved = localStorage.getItem("customer");
+    return saved ? JSON.parse(saved) : null;
+  });
 
   const [services, setServices] = useState([]);
   const [stylists, setStylists] = useState([]);
@@ -44,7 +53,7 @@ export default function Bookings({ token, customer }) {
       }
     };
 
-    fetchData();
+    if (token) fetchData();
   }, [token]);
 
   if (loading) {
@@ -87,15 +96,30 @@ export default function Bookings({ token, customer }) {
               );
 
               if (res.ok) {
-                alert("Booking successful!");
-                navigate("/my-bookings");
+                Swal.fire({
+                  title: "Booking Confirmed!",
+                  text: "Your appointment has been booked successfully.",
+                  icon: "success",
+                  confirmButtonText: "View My Bookings",
+                }).then(() => {
+                  navigate("/my-bookings");
+                });
               } else {
                 const error = await res.json();
-                alert(error.error || "Booking failed");
+                Swal.fire({
+                  title: "Booking Failed",
+                  text: error.error || "Something went wrong.",
+                  icon: "error",
+                  confirmButtonText: "Try Again",
+                });
               }
             } catch (err) {
               console.error(err);
-              alert("An error occurred while booking.");
+              Swal.fire({
+                title: "Error",
+                text: "An error occurred while booking. Please try again.",
+                icon: "error",
+              });
             } finally {
               setSubmitting(false);
             }
@@ -125,7 +149,7 @@ export default function Bookings({ token, customer }) {
                   <ErrorMessage name="service" component="div" className="error" />
                 </div>
 
-                {/* Stylist dropdown (filtered by service) */}
+                {/* Stylist dropdown */}
                 <div>
                   <label>Stylist:</label>
                   <Field as="select" name="stylist" className="border rounded p-2 w-full mb-2">
@@ -151,7 +175,7 @@ export default function Bookings({ token, customer }) {
                 </div>
 
                 <button className="book-btn" type="submit" disabled={isSubmitting}>
-                  Book
+                  {isSubmitting ? "Booking..." : "Book"}
                 </button>
               </Form>
             );

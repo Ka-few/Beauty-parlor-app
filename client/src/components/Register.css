@@ -69,3 +69,32 @@
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
+
+.alert-error {
+  background: #fdecea;
+  color: #b71c1c;
+  padding: 12px 15px;
+  margin-bottom: 1rem;
+  border-left: 5px solid #f44336;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  text-align: left;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.alert-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 12px 15px;
+  margin-bottom: 1rem;
+  border-left: 5px solid #4caf50;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  text-align: left;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
