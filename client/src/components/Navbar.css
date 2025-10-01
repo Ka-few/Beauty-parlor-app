@@ -1,4 +1,6 @@
 /* Navbar.css */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap');
+
 
 * {
   box-sizing: border-box; /* ensures padding/margin don't cause overflow */
@@ -34,6 +36,25 @@
   color: #ffd700; /* Bright gold */
   text-decoration: none;
   transition: color 0.3s ease;
+}
+
+.logo {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffd700; /* Bright gold */
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.6), 
+               0 0 12px rgba(255, 215, 0, 0.5);
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.logo:hover {
+  color: #fff3a3; /* Softer glowing gold */
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.9),
+               0 0 20px rgba(255, 215, 0, 0.7);
+  transform: scale(1.05);
 }
 
 .navbar-logo:hover {
