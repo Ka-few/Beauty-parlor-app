@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import "./BookingList.css";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+
 export default function BookingList({ token, customer }) {
   const [bookings, setBookings] = useState([]);
 
@@ -10,7 +12,7 @@ export default function BookingList({ token, customer }) {
     const fetchBookings = async () => {
       try {
         const res = await fetch(
-          `https://beauty-parlor-app-5.onrender.com/bookings?customer_id=${customer.id}`,
+          `${API_URL}/bookings?customer_id=${customer.id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

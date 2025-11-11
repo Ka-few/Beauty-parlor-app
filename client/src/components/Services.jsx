@@ -4,11 +4,13 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import './Services.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+
 export default function Services({ user: propUser, token: propToken }) {
   const navigate = useNavigate();
 
   // Restore user + token from localStorage if not passed as props
-  const [token, setToken] = useState(() => propToken || localStorage.getItem("token"));
+  const [token, setToken] = useState(() => propToken || localStorage.getItem("access_token"));
   const [user, setUser] = useState(() => {
     if (propUser) return propUser;
     const saved = localStorage.getItem("customer");
@@ -23,7 +25,7 @@ export default function Services({ user: propUser, token: propToken }) {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch("https://beauty-parlor-app-5.onrender.com/services");
+        const res = await fetch(`${API_URL}/services`);
         if (!res.ok) throw new Error("Failed to fetch services");
         const data = await res.json();
         setServices(data);
@@ -48,15 +50,16 @@ export default function Services({ user: propUser, token: propToken }) {
 
   // Admin formik form
   const formik = useFormik({
-    initialValues: { name: "", description: "", price: "" },
+    initialValues: { title: "", description: "", price: "", image_url: "" },
     validationSchema: Yup.object({
-      name: Yup.string().required("Required"),
+      title: Yup.string().required("Required"),
       description: Yup.string().required("Required"),
       price: Yup.number().positive().required("Required"),
+      image_url: Yup.string().url("Must be a valid URL").nullable(),
     }),
     onSubmit: async (values, { resetForm }) => {
       try {
-        const res = await fetch("https://beauty-parlor-app-5.onrender.com/services", {
+        const res = await fetch(`${API_URL}/services`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -67,7 +70,7 @@ export default function Services({ user: propUser, token: propToken }) {
         if (!res.ok) throw new Error("Failed to add service");
 
         resetForm();
-        const updated = await fetch("https://beauty-parlor-app-5.onrender.com/services");
+        const updated = await fetch(`${API_URL}/services`);
         setServices(await updated.json());
       } catch (err) {
         console.error("Error adding service:", err);
@@ -82,52 +85,7 @@ export default function Services({ user: propUser, token: propToken }) {
     <div className="services-container">
       <h2>Our Services</h2>
 
-      {/* Admin-only add service form */}
-      {user?.is_admin && (
-        <form onSubmit={formik.handleSubmit} className="add-service-form">
-          <h3>Add New Service</h3>
-
-          <input
-            type="text"
-            name="name"
-            placeholder="Service Name"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.name}
-          />
-          {formik.touched.name && formik.errors.name && (
-            <p className="error">{formik.errors.name}</p>
-          )}
-
-          <textarea
-            name="description"
-            placeholder="Service Description"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.description}
-          />
-          {formik.touched.description && formik.errors.description && (
-            <p className="error">{formik.errors.description}</p>
-          )}
-
-          <input
-            type="number"
-            name="price"
-            placeholder="Price (Ksh)"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.price}
-          />
-          {formik.touched.price && formik.errors.price && (
-            <p className="error">{formik.errors.price}</p>
-          )}
-
-          <button type="submit" className="btn">
-            Add Service
-          </button>
-        </form>
-      )}
-
+     
       {/* Services list */}
       {services.length === 0 ? (
         <p className="no-services">No services available</p>
@@ -135,6 +93,9 @@ export default function Services({ user: propUser, token: propToken }) {
         <div className="service-list">
           {services.map((service) => (
             <div key={service.id} className="service-card">
+              {service.image_url && (
+                <img src={service.image_url} alt={service.title} className="service-image" />
+              )}
               <h3>{service.title}</h3>
               <p>{service.description}</p>
               <p className="service-price">Ksh {service.price}</p>

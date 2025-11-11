@@ -1,0 +1,311 @@
+/* Admin Layout */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+}
+
+.admin-sidebar {
+  width: 250px;
+  background-color: #001529;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-title {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 30px;
+  color: #fff;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-nav a {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 12px 15px;
+  text-decoration: none;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.admin-nav a:hover {
+  background-color: #1890ff;
+  color: white;
+}
+
+.admin-nav hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 15px 0;
+}
+
+.admin-main-content {
+  flex-grow: 1;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+/* General Admin Page Styles */
+.admin-page-header {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 15px;
+}
+
+/* Table Styles */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.admin-table th, .admin-table td {
+  border: 1px solid #e8e8e8;
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.admin-table th {
+  background-color: #fafafa;
+  font-weight: 600;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Card Styles for Dashboard */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.stat-card {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.stat-card p {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Chart Containers */
+.charts-grid {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.chart-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+}
+
+.chart-container h3 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* ===========================
+   Admin Stylists Page Styles
+   =========================== */
+
+.admin-stylists {
+  background-color: #f9fafc;
+  padding: 30px;
+  border-radius: 8px;
+}
+
+.admin-stylists h2 {
+  font-size: 1.8rem;
+  color: #222;
+  font-weight: 600;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #1890ff;
+  padding-bottom: 10px;
+}
+
+/* Form Section */
+.admin-form {
+  background: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.admin-form h3 {
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  color: #333;
+}
+
+.admin-input {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.admin-input:focus {
+  outline: none;
+  border-color: #1890ff;
+  box-shadow: 0 0 3px rgba(24,144,255,0.3);
+}
+
+/* Checkbox Section */
+.service-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.service-options label {
+  background: #f5f7fa;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.service-options label:hover {
+  background: #e6f7ff;
+}
+
+/* Buttons */
+.admin-button {
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 8px;
+  transition: background-color 0.3s;
+}
+
+.admin-button:hover {
+  background-color: #40a9ff;
+}
+
+/* Stylist Table */
+.stylist-list {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+
+.stylist-list h3 {
+  font-size: 1.4rem;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.admin-table th, .admin-table td {
+  border: 1px solid #e8e8e8;
+  padding: 10px 12px;
+}
+
+.admin-table th {
+  background-color: #fafafa;
+  font-weight: 600;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f0f5ff;
+}
+
+/* Edit Mode */
+.admin-table input[type="text"] {
+  width: 100%;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.admin-services {
+  background-color: #f9fafc;
+  padding: 30px;
+  border-radius: 8px;
+}
+
+.admin-services h2 {
+  font-size: 1.8rem;
+  color: #222;
+  font-weight: 600;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #1890ff;
+  padding-bottom: 10px;
+}
+
+.admin-table-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+
+.admin-table-container h3 {
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.delete {
+  background-color: #ff4d4f;
+}
+
+.delete:hover {
+  background-color: #ff7875;
+}

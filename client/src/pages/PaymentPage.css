@@ -1,0 +1,90 @@
+.payment-page-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 60px); /* Adjust based on navbar height */
+    background-color: #f0f2f5;
+    padding: 20px;
+}
+
+.payment-form {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+}
+
+.payment-form h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.payment-form p {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.phone-number-container {
+    margin-bottom: 25px;
+}
+
+.phone-number-container label {
+    display: block;
+    text-align: left;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.phone-number-container input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.pay-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+
+.pay-button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.pay-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.payment-error {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.payment-success {
+    color: #28a745;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}

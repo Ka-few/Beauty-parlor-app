@@ -12,11 +12,24 @@ import Services from "./components/Services";
 import Stylists from "./components/Stylists";
 import Bookings from "./components/Bookings";
 import BookingList from "./components/BookingList";
+import ReviewForm from "./components/ReviewForm";
 import ServiceList from "./components/ServiceList";
+
+// Admin Imports
+import AdminRoute from "./components/AdminRoute";
+import AdminLayout from "./pages/admin/AdminLayout";
+import Dashboard from "./pages/admin/Dashboard";
+import AdminUsers from "./pages/admin/Users"; // Renamed to avoid conflict with client/src/components/Users
+import AdminBookings from "./pages/admin/Bookings"; // Renamed to avoid conflict with client/src/components/Bookings
+import AdminStylists from "./pages/admin/Stylists";
+
+// Payment Imports
+import PaymentPage from "./pages/PaymentPage"; // Import PaymentPage
+
 
 function App() {
   const [customer, setCustomer] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(localStorage.getItem("access_token")); // Changed from "token" to "access_token"
   const [loading, setLoading] = useState(true);
 
   // Auto-load logged-in customer with token
@@ -28,20 +41,28 @@ function App() {
 
     const fetchMe = async () => {
       try {
-        const res = await fetch("https://beauty-parlor-app-5.onrender.com/me", {
+        // Use VITE_API_URL from .env
+        const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+        const res = await fetch(`${API_URL}/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
           const data = await res.json();
           setCustomer(data.customer);
+          // Store the entire customer object in localStorage
+          localStorage.setItem("customer", JSON.stringify(data.customer));
         } else {
           setCustomer(null);
           setToken(null);
-          localStorage.removeItem("token");
+          localStorage.removeItem("access_token"); // Changed from "token" to "access_token"
+          localStorage.removeItem("customer");
         }
       } catch (err) {
         console.error("Auth check failed:", err);
         setCustomer(null);
+        setToken(null);
+        localStorage.removeItem("access_token"); // Changed from "token" to "access_token"
+        localStorage.removeItem("customer");
       } finally {
         setLoading(false);
       }
@@ -70,22 +91,8 @@ function App() {
         {/* Services page: PUBLIC */}
         <Route path="/services" element={<Services user={customer} token={token} />} />
 
-        {/* Stylists page: only visible to admin in Navbar */}
+        {/* Stylists page */}
         <Route path="/stylists" element={<Stylists token={token} />} />
-
-        {/* Admin-only service management */}
-        <Route
-          path="/manage-services"
-          element={
-            loading ? (
-              <p>Loading...</p>
-            ) : customer?.is_admin ? (
-              <ServiceList token={token} />
-            ) : (
-              <Navigate to="/login" />
-            )
-          }
-        />
 
         {/* Customer bookings (protected) */}
         <Route
@@ -112,6 +119,44 @@ function App() {
             )
           }
         />
+
+        {/* Payment Route (protected) */}
+        <Route
+          path="/payment/:bookingId"
+          element={
+            loading ? (
+              <p>Loading...</p>
+            ) : customer ? (
+              <PaymentPage />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        {/* Review Form Route (protected) */}
+        <Route
+          path="/submit-review"
+          element={
+            loading ? (
+              <p>Loading...</p>
+            ) : customer ? (
+              <ReviewForm token={token} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+          <Route index element={<Dashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="bookings" element={<AdminBookings />} />
+          <Route path="stylists" element={<AdminStylists token={token} />} />
+          <Route path="services" element={<ServiceList token={token} />} />
+          {/* Add other admin routes here, e.g., service management */}
+        </Route>
       </Routes>
     </Router>
   );

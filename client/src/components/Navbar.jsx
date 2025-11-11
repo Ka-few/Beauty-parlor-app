@@ -5,7 +5,8 @@ export default function Navbar({ customer, setCustomer }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("access_token"); // Changed from "token" to "access_token"
+    localStorage.removeItem("customer"); // Added to clear customer data
     setCustomer(null);
     navigate("/services");
   };
@@ -39,7 +40,7 @@ export default function Navbar({ customer, setCustomer }) {
                   <Link to="/stylists">Stylists</Link>
                 </li>
                 <li>
-                  <Link to="/manage-services">Manage Services</Link>
+                  <Link to="/admin">Admin Dashboard</Link> {/* New Admin Dashboard link */}
                 </li>
               </>
             ) : (

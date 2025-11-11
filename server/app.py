@@ -4,8 +4,14 @@ from flask_restful import Api, Resource
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from models import db, Customer, Stylist, Service, stylist_service, Booking
+from models import db, Customer, Stylist, Service, stylist_service, Booking, Review
+from mpesa import get_mpesa_access_token
 from datetime import datetime
+import os
+import base64
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 app = Flask(__name__)
@@ -108,11 +114,12 @@ class ServiceList(Resource):
         title = data.get("title")
         description = data.get("description") or ""
         price = data.get("price")
+        image_url = data.get("image_url") # Get image_url
 
         if not title or price is None:
             return {"error": "Title and price are required"}, 400
 
-        service = Service(title=title, description=description, price=float(price))
+        service = Service(title=title, description=description, price=float(price), image_url=image_url) # Pass image_url
         db.session.add(service)
         db.session.commit()
         return service.to_dict(), 201
@@ -136,6 +143,7 @@ class ServiceDetail(Resource):
         service.title = data.get("title", service.title)
         service.description = data.get("description", service.description)
         service.price = float(data.get("price", service.price))
+        service.image_url = data.get("image_url", service.image_url) # Update image_url
 
         db.session.commit()
         return service.to_dict(), 200
@@ -245,6 +253,172 @@ class StylistResource(Resource):
         db.session.commit()
         return {"message": "Stylist deleted"}, 200
 
+# ------------------ ADMIN RESOURCES ------------------ #
+
+class AdminAnalyticsSummary(Resource):
+    @admin_required
+    def get(self):
+        total_users = db.session.query(db.func.count(Customer.id)).scalar()
+        total_bookings = db.session.query(db.func.count(Booking.id)).scalar()
+        total_stylists = db.session.query(db.func.count(Stylist.id)).scalar()
+
+        # Calculate total revenue by joining Booking and Service tables
+        total_revenue = db.session.query(db.func.sum(Service.price)) \
+                                  .join(Booking, Service.id == Booking.service_id) \
+                                  .scalar() or 0
+
+        # Bookings per service
+        bookings_per_service_query = db.session.query(Service.title, db.func.count(Booking.id).label('booking_count')) \
+                                               .join(Booking, Service.id == Booking.service_id) \
+                                               .group_by(Service.title) \
+                                               .order_by(db.desc('booking_count')) \
+                                               .all()
+        
+        bookings_per_service = [{"service_name": title, "count": count} for title, count in bookings_per_service_query]
+
+        # Bookings per stylist
+        bookings_per_stylist_query = db.session.query(Stylist.name, db.func.count(Booking.id).label('booking_count')) \
+                                               .join(Booking, Stylist.id == Booking.stylist_id) \
+                                               .group_by(Stylist.name) \
+                                               .order_by(db.desc('booking_count')) \
+                                               .all()
+
+        bookings_per_stylist = [{"stylist_name": name, "count": count} for name, count in bookings_per_stylist_query]
+
+
+        return {
+            "summary": {
+                "total_users": total_users,
+                "total_bookings": total_bookings,
+                "total_stylists": total_stylists,
+                "total_revenue": f"{total_revenue:.2f}"
+            },
+            "bookings_per_service": bookings_per_service,
+            "bookings_per_stylist": bookings_per_stylist
+        }, 200
+
+class AdminUserList(Resource):
+    @admin_required
+    def get(self):
+        users = Customer.query.all()
+        return [user.to_dict() for user in users], 200
+
+class AdminBookingList(Resource):
+    @admin_required
+    def get(self):
+        bookings = Booking.query.all()
+        # Enhance booking data with details for admin view
+        bookings_data = []
+        for b in bookings:
+            b_dict = b.to_dict()
+            b_dict['customer_name'] = b.customer.name
+            b_dict['stylist_name'] = b.stylist.name
+            b_dict['service_name'] = b.service.title
+            b_dict['service_price'] = b.service.price
+            bookings_data.append(b_dict)
+        return bookings_data, 200
+
+
+# ------------------ MPESA RESOURCES ------------------ #
+class InitiateMpesaPayment(Resource):
+    @jwt_required()
+    def post(self):
+        data = request.get_json()
+        amount = data.get("amount")
+        phone_number = data.get("phone_number")
+        booking_id = data.get("booking_id")
+
+        if not all([amount, phone_number, booking_id]):
+            return {"error": "Amount, phone number, and booking_id are required"}, 400
+
+        booking = Booking.query.get(booking_id)
+        if not booking:
+            return {"error": "Booking not found"}, 404
+
+        access_token = get_mpesa_access_token()
+        if not access_token:
+            return {"error": "Could not get M-Pesa access token"}, 500
+
+        api_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        shortcode = os.getenv("MPESA_SHORTCODE")
+        passkey = os.getenv("MPESA_PASSKEY")
+        password = base64.b64encode(f"{shortcode}{passkey}{timestamp}".encode()).decode()
+
+        payload = {
+            "BusinessShortCode": shortcode,
+            "Password": password,
+            "Timestamp": timestamp,
+            "TransactionType": "CustomerPayBillOnline",
+            "Amount": amount,
+            "PartyA": phone_number,
+            "PartyB": shortcode,
+            "PhoneNumber": phone_number,
+            "CallBackURL": f"{os.getenv('BASE_URL')}/mpesa-callback",
+            "AccountReference": f"Booking {booking_id}",
+            "TransactionDesc": f"Payment for booking {booking_id}",
+        }
+
+        try:
+            response = requests.post(api_url, json=payload, headers=headers)
+            response.raise_for_status()
+            return response.json(), 200
+        except requests.exceptions.RequestException as e:
+            return {"error": str(e)}, 500
+
+class MpesaCallback(Resource):
+    def post(self):
+        data = request.get_json()
+        # Process the callback data here
+        print("M-Pesa Callback:", data)
+        return {"ResultCode": 0, "ResultDesc": "Accepted"}, 200
+
+
+
+# ------------------ REVIEW RESOURCES ------------------ #
+class ReviewList(Resource):
+    @jwt_required()
+    def post(self):
+        current_customer_id = get_jwt_identity()
+        data = request.get_json()
+        rating = data.get("rating")
+        comment = data.get("comment")
+        stylist_id = data.get("stylist_id")
+
+        if not rating or not stylist_id:
+            return {"error": "Rating and stylist_id are required"}, 400
+
+        if not (1 <= rating <= 5):
+            return {"error": "Rating must be between 1 and 5"}, 400
+
+        # Check if the customer has booked a service with this stylist
+        booking_exists = Booking.query.filter_by(
+            customer_id=current_customer_id,
+            stylist_id=stylist_id
+        ).first()
+
+        if not booking_exists:
+            return {"error": "You can only review stylists you have booked a service with."}, 403
+
+        review = Review(
+            customer_id=current_customer_id,
+            stylist_id=stylist_id,
+            rating=rating,
+            comment=comment
+        )
+        db.session.add(review)
+        db.session.commit()
+        return review.to_dict(), 201
+
+class StylistReviews(Resource):
+    def get(self, stylist_id):
+        stylist = Stylist.query.get_or_404(stylist_id)
+        reviews = Review.query.filter_by(stylist_id=stylist.id).all()
+        return [review.to_dict() for review in reviews], 200
+
+
 # ------------------ RESOURCES ------------------ #
 api.add_resource(Register, "/register")
 api.add_resource(Login, "/login")
@@ -254,6 +428,19 @@ api.add_resource(ServiceDetail, "/services/<int:service_id>")
 api.add_resource(BookingList, "/bookings")
 api.add_resource(StylistListResource, "/stylists")
 api.add_resource(StylistResource, "/stylists/<int:stylist_id>")
+
+# Admin routes
+api.add_resource(AdminAnalyticsSummary, "/admin/analytics/summary")
+api.add_resource(AdminUserList, "/admin/users")
+api.add_resource(AdminBookingList, "/admin/bookings")
+
+# M-Pesa routes
+api.add_resource(InitiateMpesaPayment, "/initiate-mpesa-payment")
+api.add_resource(MpesaCallback, "/mpesa-callback")
+
+# Review routes
+api.add_resource(ReviewList, "/reviews")
+api.add_resource(StylistReviews, "/stylists/<int:stylist_id>/reviews")
 
 
 if __name__ == "__main__":

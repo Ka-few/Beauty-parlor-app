@@ -1,46 +1,51 @@
 import { useState, useEffect } from "react";
-import "./StylistList.css"; // ✅ import styles
+import "./Admin.css";
+
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 
-export default function StylistList({ token }) {
+export default function AdminStylists({ token }) {
   const [stylists, setStylists] = useState([]);
   const [services, setServices] = useState([]);
-
-  // New stylist fields
   const [newName, setNewName] = useState("");
   const [newBio, setNewBio] = useState("");
   const [newServiceIds, setNewServiceIds] = useState([]);
-
-  // Editing fields
   const [editingStylistId, setEditingStylistId] = useState(null);
   const [editingName, setEditingName] = useState("");
   const [editingBio, setEditingBio] = useState("");
   const [editingServiceIds, setEditingServiceIds] = useState([]);
 
-  // Fetch stylists
   const fetchStylists = async () => {
     try {
       const res = await fetch(`${API_URL}/stylists`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("AdminStylists: Failed to fetch stylists:", errorData);
+        throw new Error("Failed to fetch stylists");
+      }
       const data = await res.json();
       setStylists(data);
     } catch (err) {
-      console.error(err);
+      console.error("AdminStylists: Error fetching stylists:", err);
     }
   };
 
-  // Fetch services
   const fetchServices = async () => {
     try {
       const res = await fetch(`${API_URL}/services`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("AdminStylists: Failed to fetch services:", errorData);
+        throw new Error("Failed to fetch services");
+      }
       const data = await res.json();
       setServices(data);
     } catch (err) {
-      console.error(err);
+      console.error("AdminStylists: Error fetching services:", err);
     }
   };
 
@@ -51,7 +56,6 @@ export default function StylistList({ token }) {
     }
   }, [token]);
 
-  // Create stylist
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!newName) return alert("Name is required");
@@ -84,7 +88,6 @@ export default function StylistList({ token }) {
     }
   };
 
-  // Delete stylist
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this stylist?")) return;
     try {
@@ -99,7 +102,6 @@ export default function StylistList({ token }) {
     }
   };
 
-  // Edit stylist
   const handleEdit = (stylist) => {
     setEditingStylistId(stylist.id);
     setEditingName(stylist.name);
@@ -107,7 +109,6 @@ export default function StylistList({ token }) {
     setEditingServiceIds(stylist.services?.map((s) => s.id) || []);
   };
 
-  // Update stylist
   const handleUpdate = async (id) => {
     if (!editingName) return alert("Name is required");
 
@@ -140,7 +141,6 @@ export default function StylistList({ token }) {
     }
   };
 
-  // Toggle checkbox
   const toggleService = (serviceId, selectedList, setSelectedList) => {
     if (selectedList.includes(serviceId)) {
       setSelectedList(selectedList.filter((id) => id !== serviceId));
@@ -150,25 +150,26 @@ export default function StylistList({ token }) {
   };
 
   return (
-    <div className="stylist-list">
-      <h2>Stylists</h2>
+    <div className="admin-stylists">
+      <h2>Manage Stylists</h2>
 
-      {/* Create Form */}
-      <form onSubmit={handleCreate} className="stylist-form">
+      <form onSubmit={handleCreate} className="admin-form">
+        <h3>Add New Stylist</h3>
         <input
           type="text"
           placeholder="Name"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           required
+          className="admin-input"
         />
         <input
           type="text"
           placeholder="Bio"
           value={newBio}
           onChange={(e) => setNewBio(e.target.value)}
+          className="admin-input"
         />
-
         <div className="service-options">
           <label>Assign Services:</label>
           {services.map((service) => (
@@ -184,64 +185,80 @@ export default function StylistList({ token }) {
             </label>
           ))}
         </div>
-
-        <button type="submit">Add Stylist</button>
+        <button type="submit" className="admin-button">Add Stylist</button>
       </form>
 
-      {/* Stylist Cards */}
-      <ul className="stylist-cards">
-        {stylists.map((stylist) => (
-          <li key={stylist.id} className="stylist-card">
-            {editingStylistId === stylist.id ? (
-              <>
-                <input
-                  type="text"
-                  value={editingName}
-                  onChange={(e) => setEditingName(e.target.value)}
-                  placeholder="Name"
-                />
-                <input
-                  type="text"
-                  value={editingBio}
-                  onChange={(e) => setEditingBio(e.target.value)}
-                  placeholder="Bio"
-                />
-
-                <div className="service-checkboxes">
-                  <label>Assign Services:</label>
-                  {services.map((service) => (
-                    <div key={service.id} className="service-row">
-                      <span>{service.title}</span>
+      <div className="stylist-list">
+        <h3>Existing Stylists</h3>
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Bio</th>
+              <th>Services</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stylists.map((stylist) => (
+              <tr key={stylist.id}>
+                {editingStylistId === stylist.id ? (
+                  <>
+                    <td>
                       <input
-                        type="checkbox"
-                        checked={editingServiceIds.includes(service.id)}
-                        onChange={() =>
-                          toggleService(service.id, editingServiceIds, setEditingServiceIds)
-                        }
+                        type="text"
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        className="admin-input"
                       />
-                    </div>
-                  ))}
-                </div>
-
-                <button onClick={() => handleUpdate(stylist.id)}>Save</button>
-                <button onClick={() => setEditingStylistId(null)}>Cancel</button>
-              </>
-            ) : (
-              <>
-                <strong>{stylist.name}</strong> - {stylist.bio}
-                <br />
-                <em>
-                  Services:{" "}
-                  {stylist.services?.map((s) => s.title).join(", ") || "No services"}
-                </em>
-                <br />
-                <button onClick={() => handleEdit(stylist)}>Edit</button>
-                <button onClick={() => handleDelete(stylist.id)}>Delete</button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        value={editingBio}
+                        onChange={(e) => setEditingBio(e.target.value)}
+                        className="admin-input"
+                      />
+                    </td>
+                    <td>
+                      {services.map((service) => (
+                        <label key={service.id}>
+                          <input
+                            type="checkbox"
+                            checked={editingServiceIds.includes(service.id)}
+                            onChange={() =>
+                              toggleService(
+                                service.id,
+                                editingServiceIds,
+                                setEditingServiceIds
+                              )
+                            }
+                          />
+                          {service.title}
+                        </label>
+                      ))}
+                    </td>
+                    <td>
+                      <button onClick={() => handleUpdate(stylist.id)} className="admin-button">Save</button>
+                      <button onClick={() => setEditingStylistId(null)} className="admin-button">Cancel</button>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td>{stylist.name}</td>
+                    <td>{stylist.bio}</td>
+                    <td>{stylist.services?.map((s) => s.title).join(", ") || "No services"}</td>
+                    <td>
+                      <button onClick={() => handleEdit(stylist)} className="admin-button">Edit</button>
+                      <button onClick={() => handleDelete(stylist.id)} className="admin-button">Delete</button>
+                    </td>
+                  </>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

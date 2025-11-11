@@ -3,6 +3,8 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "./Login.css";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+
 export default function Login({ setCustomer, setToken }) {
   const navigate = useNavigate();
 
@@ -16,7 +18,7 @@ export default function Login({ setCustomer, setToken }) {
 
   const handleSubmit = async (values, { setSubmitting, setErrors, resetForm }) => {
     try {
-      const res = await fetch("https://beauty-parlor-app-5.onrender.com/login", {
+      const res = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -34,7 +36,7 @@ export default function Login({ setCustomer, setToken }) {
 
       if (result.access_token && result.customer) {
         // Store token for later requests
-        localStorage.setItem("token", result.access_token);
+        localStorage.setItem("access_token", result.access_token);
         setToken(result.access_token);
 
         // Ensure we include is_admin from backend

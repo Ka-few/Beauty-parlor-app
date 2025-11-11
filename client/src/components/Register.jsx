@@ -4,6 +4,8 @@ import * as Yup from "yup";
 import { useState } from "react";
 import "./Register.css";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+
 export default function Register() {
   const navigate = useNavigate();
   const [alert, setAlert] = useState(null); // { type: "success"|"error", message: "" }
@@ -22,7 +24,7 @@ export default function Register() {
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
     try {
-      const res = await fetch("https://beauty-parlor-app-5.onrender.com/register", {
+      const res = await fetch(`${API_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

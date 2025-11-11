@@ -1,0 +1,88 @@
+.review-form-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  font-family: 'Poppins', sans-serif;
+  color: #f9fafb;
+}
+
+.review-form-container h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  color: #ffd447;
+}
+
+.review-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.review-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  color: #ffd447;
+}
+
+.review-form select,
+.review-form textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
+  box-sizing: border-box; /* Ensure padding doesn't increase width */
+}
+
+.review-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.star-rating {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.star-rating button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 2.5rem;
+  color: #ccc; /* Default star color */
+  transition: color 0.2s ease;
+}
+
+.star-rating button.on .star {
+  color: #ffd700; /* Gold color for selected/hovered stars */
+}
+
+.star-rating button.off .star {
+  color: #ccc; /* Grey for unselected stars */
+}
+
+.submit-review-btn {
+  display: block;
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  background: #96198d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  margin-top: 2rem;
+}
+
+.submit-review-btn:hover {
+  background: #7a126e;
+  transform: scale(1.02);
+}

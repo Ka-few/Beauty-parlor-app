@@ -36,6 +36,13 @@ class Service(db.Model, SerializerMixin):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255), nullable=True)
     price = db.Column(db.Float, nullable=False)
+    image_url = db.Column(db.String(255), nullable=True)
+
+    bookings = db.relationship(
+        "Booking",
+        back_populates="service",
+        cascade="all, delete-orphan"
+    )
 
 # ----------------- STYLIST -----------------
 class Stylist(db.Model, SerializerMixin):
@@ -58,19 +65,37 @@ class Stylist(db.Model, SerializerMixin):
         cascade="all, delete-orphan"
     )
 
-# ----------------- BOOKING -----------------
 class Booking(db.Model, SerializerMixin):
     __tablename__ = "booking"
-    serialize_rules = ("-customer.bookings", "-stylist.bookings", "-service.bookings")
+    serialize_rules = ("-customer.bookings", "-stylist.bookings", "-bookings.service")
 
     id = db.Column(db.Integer, primary_key=True)
     appointment_time = db.Column(db.DateTime, nullable=False)
+    payment_status = db.Column(db.String(50), default="pending", nullable=False)
+    payment_intent_id = db.Column(db.String(255), nullable=True)
 
     customer_id = db.Column(db.Integer, db.ForeignKey("customer.id"), nullable=False)
-    customer = db.relationship("Customer", back_populates="bookings")
-
+    service_id = db.Column(db.Integer, db.ForeignKey("service.id"), nullable=False)
     stylist_id = db.Column(db.Integer, db.ForeignKey("stylist.id"), nullable=False)
+
+    customer = db.relationship("Customer", back_populates="bookings")
+    service = db.relationship("Service", back_populates="bookings")
     stylist = db.relationship("Stylist", back_populates="bookings")
 
-    service_id = db.Column(db.Integer, db.ForeignKey("service.id"), nullable=False)
-    service = db.relationship("Service", backref="bookings")
+
+
+# ----------------- REVIEW -----------------
+class Review(db.Model, SerializerMixin):
+    __tablename__ = "review"
+    serialize_rules = ("-customer.reviews", "-stylist.reviews")
+
+    id = db.Column(db.Integer, primary_key=True)
+    rating = db.Column(db.Integer, nullable=False) # 1-5 stars
+    comment = db.Column(db.String(500), nullable=True)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    customer_id = db.Column(db.Integer, db.ForeignKey("customer.id"), nullable=False)
+    stylist_id = db.Column(db.Integer, db.ForeignKey("stylist.id"), nullable=False)
+
+    customer = db.relationship("Customer", backref=db.backref("reviews", lazy=True))
+    stylist = db.relationship("Stylist", backref=db.backref("reviews", lazy=True))

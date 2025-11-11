@@ -1,51 +1,62 @@
 .servicelist-container {
-  max-width: 900px;
-  margin: 2rem auto;
   padding: 2rem;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(12px);
   font-family: 'Poppins', sans-serif;
-  color: #f9fafb; /* brighter, almost white */
+  background: #f9fafb;
+  min-height: 100vh;
 }
 
 .servicelist-container h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #96198d;
+  margin-bottom: 2rem;
   text-align: center;
-  margin-bottom: 1.5rem;
-  font-size: 1.8rem;
-  color: #ffd447; /* bright gold for title */
+  border-bottom: 3px solid rgba(227, 181, 27, 0.6);
+  display: inline-block;
+  padding-bottom: 0.5rem;
 }
 
 /* Form */
 .service-form {
-  display: grid;
-  gap: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.service-form input {
-  padding: 0.7rem 1rem;
-  border-radius: 8px;
+.service-form input[type="text"],
+.service-form input[type="number"] {
+  padding: 0.7rem;
+  border-radius: 6px;
   border: 1px solid #ccc;
-  font-size: 1rem;
-  background: rgba(255, 255, 255, 0.9);
-  color: #111; /* darker font for readability */
+  font-size: 0.95rem;
+  transition: border 0.2s ease;
+}
+
+.service-form input[type="text"]:focus,
+.service-form input[type="number"]:focus {
+  outline: none;
+  border-color: #96198d;
 }
 
 .service-form button {
   background: #96198d;
   color: #fff;
+  padding: 0.6rem 1.2rem;
   border: none;
-  padding: 0.7rem 1.2rem;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
   transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .service-form button:hover {
-  background: #7a126e;
+  background: #7d1476;
   transform: scale(1.05);
 }
 
@@ -54,48 +65,62 @@
   list-style: none;
   padding: 0;
   display: grid;
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
 }
 
 .service-card {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex; /* Added for image and info layout */
+  flex-direction: column; /* Arrange items vertically */
+  align-items: center; /* Center items horizontally */
+  text-align: center; /* Center text */
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 .service-info {
   flex: 1;
+  margin-top: 1rem; /* Add some space after the image */
 }
 
 .service-info strong {
   font-size: 1.2rem;
-  color: #0c1029; /* stronger white */
+  color: #333; /* Darker color for better contrast */
 }
 
 .service-info p {
   margin: 0.2rem 0;
   font-size: 1rem;
-  color: #04010c; /* brighter than #ddd */
+  color: #555; /* Slightly darker for readability */
 }
 
 /* Actions */
+.service-actions {
+  margin-top: 1rem; /* Space above buttons */
+}
+
 .service-actions button {
   margin-left: 0.5rem;
-  background: #ffd447; /* gold */
+  background: #96198d; /* gold */
   border: none;
-  color: #111;
-  padding: 0.5rem 0.8rem;
+  color: #fff;
+  padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: background 0.3s ease, transform 0.2s ease;
   font-weight: 500;
 }
 
 .service-actions button:hover {
+  background: #7d1476;
   transform: scale(1.05);
 }
 
@@ -108,12 +133,21 @@
   background: #dc2626;
 }
 
+.service-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 1rem;
+}
+
 /* Edit mode */
 .service-edit {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   flex: 1;
+  width: 100%; /* Ensure it takes full width in edit mode */
 }
 
 .service-edit input {
@@ -122,4 +156,6 @@
   border: 1px solid #ccc;
   background: rgba(255, 255, 255, 0.95);
   color: #111; /* dark text */
+  width: 100%; /* Ensure inputs take full width */
+  box-sizing: border-box; /* Include padding in width calculation */
 }

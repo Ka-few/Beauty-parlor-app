@@ -5,11 +5,13 @@ import * as Yup from "yup";
 import Swal from "sweetalert2";
 import "./Bookings.css";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+
 export default function Bookings({ token: propToken, customer: propCustomer }) {
   const navigate = useNavigate();
 
   // Restore token/customer from localStorage if not passed as props
-  const [token, setToken] = useState(() => propToken || localStorage.getItem("token"));
+  const [token, setToken] = useState(() => propToken || localStorage.getItem("access_token"));
   const [customer, setCustomer] = useState(() => {
     if (propCustomer) return propCustomer;
     const saved = localStorage.getItem("customer");
@@ -32,11 +34,11 @@ export default function Bookings({ token: propToken, customer: propCustomer }) {
     const fetchData = async () => {
       try {
         const serviceRes = await fetch(
-          "https://beauty-parlor-app-5.onrender.com/services",
+          `${API_URL}/services`,
           { headers: token ? { Authorization: `Bearer ${token}` } : {} }
         );
         const stylistRes = await fetch(
-          "https://beauty-parlor-app-5.onrender.com/stylists",
+          `${API_URL}/stylists`,
           { headers: token ? { Authorization: `Bearer ${token}` } : {} }
         );
 
@@ -80,7 +82,7 @@ export default function Bookings({ token: propToken, customer: propCustomer }) {
 
             try {
               const res = await fetch(
-                "https://beauty-parlor-app-5.onrender.com/bookings",
+                `${API_URL}/bookings`,
                 {
                   method: "POST",
                   headers: {
@@ -96,13 +98,21 @@ export default function Bookings({ token: propToken, customer: propCustomer }) {
               );
 
               if (res.ok) {
+                const bookingResult = await res.json();
+                const bookedService = services.find(s => s.id === Number(values.service));
+
                 Swal.fire({
                   title: "Booking Confirmed!",
-                  text: "Your appointment has been booked successfully.",
+                  text: "Your appointment has been booked successfully. Please proceed to payment.",
                   icon: "success",
-                  confirmButtonText: "View My Bookings",
+                  confirmButtonText: "Proceed to Payment",
                 }).then(() => {
-                  navigate("/my-bookings");
+                  navigate(`/payment/${bookingResult.booking.id}`, {
+                    state: {
+                      amount: bookedService.price,
+                      serviceTitle: bookedService.title,
+                    },
+                  });
                 });
               } else {
                 const error = await res.json();
