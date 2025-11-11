@@ -9,6 +9,7 @@ from mpesa import get_mpesa_access_token
 from datetime import datetime
 import os
 import base64
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()

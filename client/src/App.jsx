@@ -42,7 +42,7 @@ function App() {
     const fetchMe = async () => {
       try {
         // Use VITE_API_URL from .env
-        const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+        const API_URL = import.meta.env.VITE_API_URL || 'https://beauty-parlor-app-5.onrender.com';
         const res = await fetch(`${API_URL}/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });

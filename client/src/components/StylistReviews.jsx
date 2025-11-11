@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import './StylistReviews.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
+const API_URL = import.meta.env.VITE_API_URL || 'https://beauty-parlor-app-5.onrender.com';
 
 export default function StylistReviews({ stylistId }) {
   const [reviews, setReviews] = useState([]);
