@@ -13,18 +13,18 @@ import Stylists from "./components/Stylists";
 import Bookings from "./components/Bookings";
 import BookingList from "./components/BookingList";
 import ReviewForm from "./components/ReviewForm";
-import ServiceList from "./components/ServiceList";
 
 // Admin Imports
 import AdminRoute from "./components/AdminRoute";
 import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
-import AdminUsers from "./pages/admin/Users"; // Renamed to avoid conflict with client/src/components/Users
-import AdminBookings from "./pages/admin/Bookings"; // Renamed to avoid conflict with client/src/components/Bookings
+import AdminUsers from "./pages/admin/Users";
+import AdminBookings from "./pages/admin/Bookings";
 import AdminStylists from "./pages/admin/Stylists";
+import AdminServices from "./pages/admin/Services";
 
 // Payment Imports
-import PaymentPage from "./pages/PaymentPage"; // Import PaymentPage
+import PaymentPage from "./pages/PaymentPage";
 
 
 function App() {
@@ -154,8 +154,7 @@ function App() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="bookings" element={<AdminBookings />} />
           <Route path="stylists" element={<AdminStylists token={token} />} />
-          <Route path="services" element={<ServiceList token={token} />} />
-          {/* Add other admin routes here, e.g., service management */}
+          <Route path="services" element={<AdminServices token={token} />} />
         </Route>
       </Routes>
     </Router>

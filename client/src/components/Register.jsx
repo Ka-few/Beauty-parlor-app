@@ -19,7 +19,6 @@ export default function Register() {
     password: Yup.string()
       .min(6, "Password must be at least 6 characters")
       .required("Password is required"),
-    isAdmin: Yup.boolean(),
   });
 
   const handleSubmit = async (values, { setSubmitting, resetForm }) => {
@@ -31,7 +30,6 @@ export default function Register() {
           name: values.name,
           phone: values.phone,
           password: values.password,
-          is_admin: values.isAdmin,
         }),
       });
 
@@ -45,6 +43,10 @@ export default function Register() {
       if (result.customer) {
         setAlert({ type: "success", message: "✅ Registration successful! Redirecting to login..." });
         resetForm();
+
+        // Store redirect path for after login
+        const redirectPath = localStorage.getItem("redirectAfterLogin") || "/bookings";
+        localStorage.setItem("redirectAfterLogin", redirectPath);
 
         // Redirect after showing the message
         setTimeout(() => navigate("/login"), 2500);
@@ -66,7 +68,7 @@ export default function Register() {
       )}
 
       <Formik
-        initialValues={{ name: "", phone: "", password: "", isAdmin: false }}
+        initialValues={{ name: "", phone: "", password: "" }}
         validationSchema={validationSchema}
         onSubmit={handleSubmit}
       >
@@ -82,13 +84,6 @@ export default function Register() {
 
             <Field type="password" name="password" placeholder="Password" />
             <ErrorMessage name="password" component="div" className="error" />
-
-            <div className="checkbox-group">
-              <label>
-                <Field type="checkbox" name="isAdmin" />
-                Register as Admin
-              </label>
-            </div>
 
             <button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Registering..." : "Register"}

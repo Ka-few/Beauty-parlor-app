@@ -33,16 +33,11 @@ export default function Navbar({ customer, setCustomer }) {
               <Link to="/services">Services</Link>
             </li>
 
-            {/* Admin-only links */}
+            {/* Admin-only link to dashboard */}
             {customer.is_admin ? (
-              <>
-                <li>
-                  <Link to="/stylists">Stylists</Link>
-                </li>
-                <li>
-                  <Link to="/admin">Admin Dashboard</Link> {/* New Admin Dashboard link */}
-                </li>
-              </>
+              <li>
+                <Link to="/admin">Admin Dashboard</Link>
+              </li>
             ) : (
               // Normal customer-only link
               <li>

@@ -1,103 +1,54 @@
-import { useState, useEffect } from "react";
-import "./ServiceList.css";
+import { useEffect, useState } from 'react';
+import './Admin.css';
 
-const API_URL = import.meta.env.VITE_API_URL || "https://beauty-parlor-app-5.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || 'https://beauty-parlor-app-5.onrender.com';
 
-
-export default function ServiceList({ token }) {
-  console.log("ServiceList component rendered.");
+export default function ServiceList() {
   const [services, setServices] = useState([]);
-  const [newTitle, setNewTitle] = useState("");
-  const [newDescription, setNewDescription] = useState("");
-  const [newPrice, setNewPrice] = useState("");
-  const [newImageUrl, setNewImageUrl] = useState("");
-  const [editingServiceId, setEditingServiceId] = useState(null);
-  const [editingTitle, setEditingTitle] = useState("");
-  const [editingDescription, setEditingDescription] = useState("");
-  const [editingPrice, setEditingPrice] = useState("");
-  const [editingImageUrl, setEditingImageUrl] = useState("");
-
-  // Fetch all services
-  const fetchServices = async () => {
-    console.log("ServiceList: Fetching services with token:", token);
-    try {
-      const res = await fetch(`${API_URL}/services`, {
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error("ServiceList: Failed to fetch services:", errorData);
-        throw new Error("Failed to fetch services");
-      }
-      const data = await res.json();
-      console.log("ServiceList: Services fetched:", data);
-      setServices(data);
-    } catch (err) {
-      console.error("ServiceList: Error fetching services:", err);
-    }
-  };
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log("ServiceList: useEffect - token:", token);
-    if (token) fetchServices();
-  }, [token]);
+    const fetchServices = async () => {
+      try {
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(`${API_URL}/admin/services`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
 
-  // Create new service
-  const handleCreate = async (e) => {
-    e.preventDefault();
-    if (!newTitle || !newDescription || !newPrice)
-      return alert("All fields are required");
+        if (!response.ok) {
+          throw new Error('Failed to fetch services.');
+        }
 
-    try {
-      const res = await fetch(`${API_URL}/services`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: newTitle,
-          description: newDescription,
-          price: Number(newPrice),
-          image_url: newImageUrl,
-        }),
-      });
-
-      if (res.ok) {
-        setNewTitle("");
-        setNewDescription("");
-        setNewPrice("");
-        fetchServices(); // Refresh list
-      } else {
-        const error = await res.json();
-        alert(error.error || "Error creating service");
+        const data = await response.json();
+        setServices(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    };
 
-  // Delete service
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this service?")) return;
+    fetchServices();
+  }, []);
 
-    try {
-      const res = await fetch(`${API_URL}/services/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  if (loading) return <div>Loading services...</div>;
+  if (error) return <div>Error: {error}</div>;
 
-      if (res.ok) fetchServices();
-      else alert("Error deleting service");
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Start editing
-  const handleEdit = (service) => {
-    setEditingServiceId(service.id);
-    setEditingTitle(service.title);
-    setEditingDescription(service.description);
+  return (
+    <div>
+      <h1 className="admin-page-header">Service Management</h1>
+      <table className="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Image URL</th>
+          </tr>
     setEditingPrice(service.price);
     setEditingImageUrl(service.image_url);
   };
@@ -146,94 +97,19 @@ export default function ServiceList({ token }) {
         <input
           type="text"
           placeholder="Title"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Description"
-          value={newDescription}
-          onChange={(e) => setNewDescription(e.target.value)}
-          required
-        />
-        <input
-          type="number"
-          placeholder="Price"
-          value={newPrice}
-          onChange={(e) => setNewPrice(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Image URL"
-          value={newImageUrl}
-          onChange={(e) => setNewImageUrl(e.target.value)}
-        />
-        <button type="submit">Add Service</button>
-      </form>
-
-      {/* Service list */}
-      <ul className="service-list">
-        {services.map((service) => (
-          <li key={service.id} className="service-card">
-            {editingServiceId === service.id ? (
-              <div className="service-edit">
-                <input
-                  type="text"
-                  value={editingTitle}
-                  onChange={(e) => setEditingTitle(e.target.value)}
-                  placeholder="Title"
-                />
-                <input
-                  type="text"
-                  value={editingDescription}
-                  onChange={(e) => setEditingDescription(e.target.value)}
-                  placeholder="Description"
-                />
-                <input
-                  type="number"
-                  value={editingPrice}
-                  onChange={(e) => setEditingPrice(e.target.value)}
-                  placeholder="Price"
-                />
-                <input
-                  type="text"
-                  value={editingImageUrl}
-                  onChange={(e) => setEditingImageUrl(e.target.value)}
-                  placeholder="Image URL"
-                />
-                <div className="service-actions">
-                  <button onClick={() => handleUpdate(service.id)}>Save</button>
-                  <button onClick={() => setEditingServiceId(null)}>
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                {service.image_url && (
-                  <img src={service.image_url} alt={service.title} className="service-image" />
-                )}
-                <div className="service-info">
-                  <strong>{service.title}</strong>
-                  <p>{service.description}</p>
-                  <p>Kshs: {service.price}</p>
-                </div>
-                <div className="service-actions">
-                  <button onClick={() => handleEdit(service)}>Edit</button>
-                  <button
-                    onClick={() => handleDelete(service.id)}
-                    className="delete"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+        </thead>
+        <tbody>
+          {services.map(service => (
+            <tr key={service.id}>
+              <td>{service.id}</td>
+              <td>{service.title}</td>
+              <td>{service.description}</td>
+              <td>Kshs {service.price.toFixed(2)}</td>
+              <td>{service.image_url || 'N/A'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

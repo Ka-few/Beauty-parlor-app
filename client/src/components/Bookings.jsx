@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Formik, Form, Field, ErrorMessage, FieldArray } from "formik";
 import * as Yup from "yup";
 import Swal from "sweetalert2";
 import "./Bookings.css";
@@ -9,6 +9,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 
 export default function Bookings({ token: propToken, customer: propCustomer }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const preSelectedServiceId = searchParams.get("serviceId");
 
   // Restore token/customer from localStorage if not passed as props
   const [token, setToken] = useState(() => propToken || localStorage.getItem("access_token"));
@@ -62,16 +64,32 @@ export default function Bookings({ token: propToken, customer: propCustomer }) {
     return <p>Loading booking details...</p>;
   }
 
+  // Get stylists for a specific service
+  const getStylistsForService = (serviceId) => {
+    return stylists.filter(stylist =>
+      stylist.services && stylist.services.some(s => s.id === Number(serviceId))
+    );
+  };
+
   return (
     <div className="booking-container">
       <div className="booking-form-wrapper">
-        <h2>Confirm Your Booking</h2>
+        <h2>Create Your Booking</h2>
 
         <Formik
-          initialValues={{ service: "", stylist: "", appointmentTime: "" }}
+          initialValues={{
+            serviceSelections: preSelectedServiceId
+              ? [{ service_id: preSelectedServiceId, stylist_id: "" }]
+              : [{ service_id: "", stylist_id: "" }],
+            appointmentTime: "",
+          }}
           validationSchema={Yup.object({
-            service: Yup.string().required("Please select a service"),
-            stylist: Yup.string().required("Please select a stylist"),
+            serviceSelections: Yup.array().of(
+              Yup.object({
+                service_id: Yup.string().required("Please select a service"),
+                stylist_id: Yup.string().required("Please select a stylist"),
+              })
+            ),
             appointmentTime: Yup.string().required("Please select a date and time"),
           })}
           onSubmit={async (values, { setSubmitting }) => {
@@ -81,46 +99,70 @@ export default function Bookings({ token: propToken, customer: propCustomer }) {
             }
 
             try {
-              const res = await fetch(
-                `${API_URL}/bookings`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    service_id: Number(values.service),
-                    stylist_id: Number(values.stylist),
-                    appointment_time: values.appointmentTime,
-                  }),
+              const bookings = [];
+              let totalPrice = 0;
+              const failedBookings = [];
+
+              // Create bookings for each service/stylist pair
+              for (const selection of values.serviceSelections) {
+                const res = await fetch(
+                  `${API_URL}/bookings`,
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                      service_id: Number(selection.service_id),
+                      stylist_id: Number(selection.stylist_id),
+                      appointment_time: values.appointmentTime,
+                    }),
+                  }
+                );
+
+                if (res.ok) {
+                  const bookingResult = await res.json();
+                  bookings.push(bookingResult.booking);
+                  const bookedService = services.find(s => s.id === Number(selection.service_id));
+                  totalPrice += bookedService?.price || 0;
+                } else {
+                  const error = await res.json();
+                  failedBookings.push({
+                    service: services.find(s => s.id === Number(selection.service_id))?.title,
+                    error: error.error || "Unknown error",
+                  });
                 }
-              );
+              }
 
-              if (res.ok) {
-                const bookingResult = await res.json();
-                const bookedService = services.find(s => s.id === Number(values.service));
-
+              if (failedBookings.length > 0) {
                 Swal.fire({
-                  title: "Booking Confirmed!",
-                  text: "Your appointment has been booked successfully. Please proceed to payment.",
+                  title: "Some Bookings Failed",
+                  html: `<div style="text-align: left;">${failedBookings
+                    .map(
+                      (b) =>
+                        `<p><strong>${b.service}:</strong> ${b.error}</p>`
+                    )
+                    .join("")}</div>`,
+                  icon: "warning",
+                  confirmButtonText: "Continue",
+                });
+              }
+
+              if (bookings.length > 0) {
+                Swal.fire({
+                  title: "Bookings Confirmed!",
+                  text: `${bookings.length} appointment(s) have been booked successfully. Please proceed to payment.`,
                   icon: "success",
                   confirmButtonText: "Proceed to Payment",
                 }).then(() => {
-                  navigate(`/payment/${bookingResult.booking.id}`, {
+                  // Redirect to payment with first booking ID and total price
+                  navigate(`/payment/${bookings[0].id}`, {
                     state: {
-                      amount: bookedService.price,
-                      serviceTitle: bookedService.title,
+                      amount: totalPrice,
+                      bookings: bookings,
                     },
                   });
-                });
-              } else {
-                const error = await res.json();
-                Swal.fire({
-                  title: "Booking Failed",
-                  text: error.error || "Something went wrong.",
-                  icon: "error",
-                  confirmButtonText: "Try Again",
                 });
               }
             } catch (err) {
@@ -135,61 +177,124 @@ export default function Bookings({ token: propToken, customer: propCustomer }) {
             }
           }}
         >
-          {({ values, isSubmitting }) => {
-            // Filter stylists by selected service
-            const filteredStylists = stylists.filter((stylist) =>
-              stylist.services.some(
-                (service) => service.id === Number(values.service)
-              )
-            );
+          {({ values, isSubmitting, errors, touched }) => (
+            <Form className="booking-form">
+              <FieldArray name="serviceSelections">
+                {(arrayHelpers) => (
+                  <div>
+                    <div className="service-selections">
+                      {values.serviceSelections.map((selection, index) => {
+                        const availableStylists = getStylistsForService(selection.service_id);
+                        return (
+                          <div key={index} className="service-pair">
+                            <div className="pair-row">
+                              <div className="form-group">
+                                <label htmlFor={`serviceSelections.${index}.service_id`}>
+                                  <strong>Service {index + 1}:</strong>
+                                </label>
+                                <Field
+                                  as="select"
+                                  name={`serviceSelections.${index}.service_id`}
+                                  className="form-control"
+                                >
+                                  <option value="">Select a service</option>
+                                  {services.map((service) => (
+                                    <option key={service.id} value={service.id}>
+                                      {service.title} – Ksh {service.price}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <ErrorMessage
+                                  name={`serviceSelections.${index}.service_id`}
+                                  component="div"
+                                  className="error"
+                                />
+                              </div>
 
-            return (
-              <Form className="booking-form">
-                {/* Service dropdown */}
-                <div>
-                  <label>Service:</label>
-                  <Field as="select" name="service" className="border rounded p-2 w-full mb-2">
-                    <option value="">Select Service</option>
-                    {services.map((service) => (
-                      <option key={service.id} value={service.id}>
-                        {service.title} – Ksh {service.price}
-                      </option>
-                    ))}
-                  </Field>
-                  <ErrorMessage name="service" component="div" className="error" />
-                </div>
+                              <div className="form-group">
+                                <label htmlFor={`serviceSelections.${index}.stylist_id`}>
+                                  <strong>Stylist {index + 1}:</strong>
+                                </label>
+                                <Field
+                                  as="select"
+                                  name={`serviceSelections.${index}.stylist_id`}
+                                  className="form-control"
+                                  disabled={!selection.service_id}
+                                >
+                                  <option value="">
+                                    {!selection.service_id
+                                      ? "Select a service first"
+                                      : availableStylists.length === 0
+                                      ? "No stylists available"
+                                      : "Select a stylist"}
+                                  </option>
+                                  {availableStylists.map((stylist) => (
+                                    <option key={stylist.id} value={stylist.id}>
+                                      {stylist.name}
+                                    </option>
+                                  ))}
+                                </Field>
+                                <ErrorMessage
+                                  name={`serviceSelections.${index}.stylist_id`}
+                                  component="div"
+                                  className="error"
+                                />
+                              </div>
+                            </div>
 
-                {/* Stylist dropdown */}
-                <div>
-                  <label>Stylist:</label>
-                  <Field as="select" name="stylist" className="border rounded p-2 w-full mb-2">
-                    <option value="">Select Stylist</option>
-                    {filteredStylists.map((stylist) => (
-                      <option key={stylist.id} value={stylist.id}>
-                        {stylist.name}
-                      </option>
-                    ))}
-                  </Field>
-                  <ErrorMessage name="stylist" component="div" className="error" />
-                </div>
+                            {values.serviceSelections.length > 1 && (
+                              <button
+                                type="button"
+                                className="remove-btn"
+                                onClick={() => arrayHelpers.remove(index)}
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
 
-                {/* Appointment date */}
-                <div>
-                  <label>Appointment Date:</label>
-                  <Field type="datetime-local" name="appointmentTime" />
-                  <ErrorMessage
-                    name="appointmentTime"
-                    component="div"
-                    className="error"
-                  />
-                </div>
+                    <button
+                      type="button"
+                      className="add-service-btn"
+                      onClick={() =>
+                        arrayHelpers.push({ service_id: "", stylist_id: "" })
+                      }
+                    >
+                      + Add Another Service
+                    </button>
+                  </div>
+                )}
+              </FieldArray>
 
-                <button className="book-btn" type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Booking..." : "Book"}
-                </button>
-              </Form>
-            );
-          }}
+              {/* Appointment date */}
+              <div className="form-group">
+                <label htmlFor="appointmentTime">
+                  <strong>Appointment Date & Time:</strong>
+                </label>
+                <Field
+                  type="datetime-local"
+                  name="appointmentTime"
+                  className="form-control"
+                />
+                <ErrorMessage
+                  name="appointmentTime"
+                  component="div"
+                  className="error"
+                />
+              </div>
+
+              <button
+                className="book-btn"
+                type="submit"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Booking..." : "Book Now"}
+              </button>
+            </Form>
+          )}
         </Formik>
       </div>
     </div>

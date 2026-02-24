@@ -57,8 +57,8 @@ class Register(Resource):
             return {"error": "Phone already registered"}, 400
 
         hashed_pw = bcrypt.generate_password_hash(data["password"]).decode()
-        is_admin = data.get("is_admin", False)
-        customer = Customer(name=data["name"], phone=data["phone"], password_hash=hashed_pw, is_admin=is_admin)
+        # Always register as customer (is_admin = False)
+        customer = Customer(name=data["name"], phone=data["phone"], password_hash=hashed_pw, is_admin=False)
         db.session.add(customer)
         db.session.commit()
 

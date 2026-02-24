@@ -42,9 +42,12 @@ export default function Services({ user: propUser, token: propToken }) {
   // Handle booking
   const handleBooking = (serviceId) => {
     if (!user) {
-      navigate("/login"); // guest → login
+      // Not logged in - redirect to register, then they'll be redirected to login, then to booking
+      localStorage.setItem("redirectAfterLogin", `/bookings?serviceId=${serviceId}`);
+      navigate("/register");
     } else if (!user.is_admin) {
-      navigate(`/bookings?serviceId=${serviceId}`); // customer → bookings
+      // Already logged in - go directly to booking with service pre-selected
+      navigate(`/bookings?serviceId=${serviceId}`);
     }
   };
 

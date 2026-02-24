@@ -1,18 +1,21 @@
 from datetime import datetime, timedelta
-from app import app, db
+from app import app, db, bcrypt
 from models import Customer, Stylist, Service, Booking
 
 with app.app_context():
-    # Clear existing data
-    Booking.query.delete()
-    Customer.query.delete()
-    Stylist.query.delete()
-    Service.query.delete()
+    # Drop all tables and recreate them from scratch
+    db.drop_all()
+    db.create_all()
+
+    # --- Default Admin User ---
+    admin_password_hash = bcrypt.generate_password_hash("admin123").decode()
+    admin = Customer(name="admin", phone="0700123456", password_hash=admin_password_hash, is_admin=True)
+    db.session.add(admin)
     db.session.commit()
 
     # --- Customers ---
-    customer1 = Customer(name="Alice Johnson", phone="0765235645", password_hash="hashedpassword1")
-    customer2 = Customer(name="Bob Smith", phone="0789098790", password_hash="hashedpassword2")
+    customer1 = Customer(name="Alice Johnson", phone="0765235645", password_hash="hashedpassword1", is_admin=False)
+    customer2 = Customer(name="Bob Smith", phone="0789098790", password_hash="hashedpassword2", is_admin=False)
     db.session.add_all([customer1, customer2])
     db.session.commit()
 
@@ -45,4 +48,8 @@ with app.app_context():
     db.session.add_all([booking1, booking2])
     db.session.commit()
 
-    print("Database seeded successfully!")
+    print("✅ Database seeded successfully!")
+    print("\n📋 Default Admin Credentials:")
+    print("   Name: admin")
+    print("   Phone: 0700123456")
+    print("   Password: admin123")
