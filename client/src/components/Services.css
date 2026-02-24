@@ -25,6 +25,75 @@
   border-radius: 2px;
 }
 
+.auth-toast {
+  position: sticky;
+  top: 1rem;
+  z-index: 20;
+  max-width: 1000px;
+  margin: 0 auto 1.5rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(150, 25, 141, 0.12) 0%, rgba(255, 215, 0, 0.12) 100%);
+  border: 1px solid rgba(150, 25, 141, 0.2);
+  color: #4a2a48;
+  box-shadow: 0 10px 28px rgba(150, 25, 141, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  animation: toastSlideIn 0.35s ease;
+}
+
+.auth-toast-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.auth-toast-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.auth-toast-link {
+  background: transparent;
+  border: 1px solid rgba(150, 25, 141, 0.4);
+  color: #96198d;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-toast-link:hover {
+  background: rgba(150, 25, 141, 0.08);
+  border-color: rgba(150, 25, 141, 0.6);
+}
+
+.auth-toast-close {
+  background: transparent;
+  border: none;
+  color: #7d1476;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .service-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -149,5 +218,9 @@
 
   .service-card h3 {
     font-size: 1.3rem;
+  }
+
+  .auth-toast {
+    position: static;
   }
 }

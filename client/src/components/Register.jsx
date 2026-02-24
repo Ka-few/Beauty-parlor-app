@@ -44,10 +44,6 @@ export default function Register() {
         setAlert({ type: "success", message: "✅ Registration successful! Redirecting to login..." });
         resetForm();
 
-        // Store redirect path for after login
-        const redirectPath = localStorage.getItem("redirectAfterLogin") || "/bookings";
-        localStorage.setItem("redirectAfterLogin", redirectPath);
-
         // Redirect after showing the message
         setTimeout(() => navigate("/login"), 2500);
       }

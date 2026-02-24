@@ -45,20 +45,14 @@ export default function Login({ setCustomer, setToken }) {
           is_admin: result.customer.is_admin ?? false,
         });
 
+        localStorage.removeItem("redirectAfterLogin");
         resetForm();
 
-        // Check if there's a redirect path after registration
-        const redirectPath = localStorage.getItem("redirectAfterLogin");
-        if (redirectPath) {
-          localStorage.removeItem("redirectAfterLogin");
-          navigate(redirectPath);
+        // Admin goes to dashboard, customer goes to services
+        if (result.customer.is_admin) {
+          navigate("/admin");
         } else {
-          // Admin goes to dashboard, customer goes to services
-          if (result.customer.is_admin) {
-            navigate("/admin");
-          } else {
-            navigate("/services");
-          }
+          navigate("/services");
         }
       }
     } catch (err) {

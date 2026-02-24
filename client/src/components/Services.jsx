@@ -20,6 +20,7 @@ export default function Services({ user: propUser, token: propToken }) {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showAuthToast, setShowAuthToast] = useState(false);
 
   // Fetch services
   useEffect(() => {
@@ -39,12 +40,17 @@ export default function Services({ user: propUser, token: propToken }) {
     fetchServices();
   }, []);
 
+  useEffect(() => {
+    if (!user) {
+      setShowAuthToast(true);
+    }
+  }, [user]);
+
   // Handle booking
   const handleBooking = (serviceId) => {
     if (!user) {
-      // Not logged in - redirect to register, then they'll be redirected to login, then to booking
-      localStorage.setItem("redirectAfterLogin", `/bookings?serviceId=${serviceId}`);
-      navigate("/register");
+      // Not logged in - redirect to login
+      navigate("/login");
     } else if (!user.is_admin) {
       // Already logged in - go directly to booking with service pre-selected
       navigate(`/bookings?serviceId=${serviceId}`);
@@ -86,8 +92,31 @@ export default function Services({ user: propUser, token: propToken }) {
 
   return (
     <div className="services-container">
-      <h2>Our Services</h2>
+      {showAuthToast && !user && (
+        <div className="auth-toast" role="status" aria-live="polite">
+          <div className="auth-toast-content">
+            <span>To book a service, please log in or create an account.</span>
+            <div className="auth-toast-actions">
+              <button type="button" onClick={() => navigate("/login")} className="auth-toast-link">
+                Login
+              </button>
+              <button type="button" onClick={() => navigate("/register")} className="auth-toast-link">
+                Register
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="auth-toast-close"
+            onClick={() => setShowAuthToast(false)}
+            aria-label="Dismiss notification"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
+      <h2>Our Services</h2>
      
       {/* Services list */}
       {services.length === 0 ? (
@@ -103,7 +132,7 @@ export default function Services({ user: propUser, token: propToken }) {
               <p>{service.description}</p>
               <p className="service-price">Ksh {service.price}</p>
 
-              {!user?.is_admin && (
+              {user && !user?.is_admin && (
                 <button
                   onClick={() => handleBooking(service.id)}
                   className="book-btn"
