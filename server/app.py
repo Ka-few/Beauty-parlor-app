@@ -169,7 +169,7 @@ class BookingList(Resource):
 
     @jwt_required()
     def post(self):
-        current_customer_id = get_jwt_identity()
+        current_customer_id = int(get_jwt_identity())
         data = request.get_json()
         customer = Customer.query.get(current_customer_id)
         stylist = Stylist.query.get(data["stylist_id"])
@@ -190,6 +190,16 @@ class BookingList(Resource):
                 appointment_time = datetime.fromisoformat(appointment_time_str)
             except ValueError:
                 return {"error": "Invalid datetime format"}, 400
+        else:
+            return {"error": "Appointment time is required"}, 400
+
+        # Prevent double-booking the same stylist at the same appointment time
+        stylist_conflict = Booking.query.filter_by(
+            stylist_id=stylist.id,
+            appointment_time=appointment_time
+        ).first()
+        if stylist_conflict:
+            return {"error": f"{stylist.name} is already booked at that time. Please choose another time."}, 409
         
         new_booking = Booking(
             customer_id=customer.id,
@@ -200,6 +210,55 @@ class BookingList(Resource):
         db.session.add(new_booking)
         db.session.commit()
         return {"booking": new_booking.to_dict()}, 201
+
+
+class BookingResource(Resource):
+    @jwt_required()
+    def put(self, booking_id):
+        current_customer_id = int(get_jwt_identity())
+        booking = Booking.query.get(booking_id)
+        if not booking:
+            return {"error": "Booking not found"}, 404
+
+        if booking.customer_id != current_customer_id:
+            return {"error": "Unauthorized"}, 403
+
+        data = request.get_json() or {}
+        appointment_time_str = data.get("appointment_time")
+        if not appointment_time_str:
+            return {"error": "Appointment time is required"}, 400
+
+        try:
+            new_appointment_time = datetime.fromisoformat(appointment_time_str)
+        except ValueError:
+            return {"error": "Invalid datetime format"}, 400
+
+        # Prevent double-booking the same stylist at the same appointment time
+        stylist_conflict = Booking.query.filter(
+            Booking.stylist_id == booking.stylist_id,
+            Booking.appointment_time == new_appointment_time,
+            Booking.id != booking.id
+        ).first()
+        if stylist_conflict:
+            return {"error": f"{booking.stylist.name} is already booked at that time. Please choose another time."}, 409
+
+        booking.appointment_time = new_appointment_time
+        db.session.commit()
+        return {"booking": booking.to_dict()}, 200
+
+    @jwt_required()
+    def delete(self, booking_id):
+        current_customer_id = int(get_jwt_identity())
+        booking = Booking.query.get(booking_id)
+        if not booking:
+            return {"error": "Booking not found"}, 404
+
+        if booking.customer_id != current_customer_id:
+            return {"error": "Unauthorized"}, 403
+
+        db.session.delete(booking)
+        db.session.commit()
+        return {"message": "Booking deleted"}, 200
     
 # ---------------- STYLISTS ---------------- #
 class StylistListResource(Resource):
@@ -332,6 +391,14 @@ class InitiateMpesaPayment(Resource):
         if not all([amount, phone_number, booking_id]):
             return {"error": "Amount, phone number, and booking_id are required"}, 400
 
+        if phone_number.startswith("0"):
+            phone_number = "254" + phone_number[1:]
+        elif phone_number.startswith("+"):
+            phone_number = phone_number[1:]
+
+        if not phone_number.isdigit() or len(phone_number) != 12:
+            return {"error": "Invalid phone format. Use 2547XXXXXXXX."}, 400
+
         booking = Booking.query.get(booking_id)
         if not booking:
             return {"error": "Booking not found"}, 404
@@ -346,6 +413,13 @@ class InitiateMpesaPayment(Resource):
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         shortcode = os.getenv("MPESA_SHORTCODE")
         passkey = os.getenv("MPESA_PASSKEY")
+        callback_url = os.getenv("MPESA_CALLBACK_URL") or (
+            f"{os.getenv('BASE_URL')}/mpesa-callback" if os.getenv("BASE_URL") else None
+        )
+
+        if not shortcode or not passkey or not callback_url:
+            return {"error": "M-Pesa config missing: MPESA_SHORTCODE, MPESA_PASSKEY, or MPESA_CALLBACK_URL"}, 500
+
         password = base64.b64encode(f"{shortcode}{passkey}{timestamp}".encode()).decode()
 
         payload = {
@@ -357,7 +431,7 @@ class InitiateMpesaPayment(Resource):
             "PartyA": phone_number,
             "PartyB": shortcode,
             "PhoneNumber": phone_number,
-            "CallBackURL": f"{os.getenv('BASE_URL')}/mpesa-callback",
+            "CallBackURL": callback_url,
             "AccountReference": f"Booking {booking_id}",
             "TransactionDesc": f"Payment for booking {booking_id}",
         }
@@ -367,6 +441,16 @@ class InitiateMpesaPayment(Resource):
             response.raise_for_status()
             return response.json(), 200
         except requests.exceptions.RequestException as e:
+            if e.response is not None:
+                try:
+                    error_payload = e.response.json()
+                except ValueError:
+                    error_payload = {"raw": e.response.text}
+                return {
+                    "error": "M-Pesa request failed",
+                    "status_code": e.response.status_code,
+                    "details": error_payload,
+                }, e.response.status_code
             return {"error": str(e)}, 500
 
 class MpesaCallback(Resource):
@@ -427,6 +511,7 @@ api.add_resource(Me, "/me")
 api.add_resource(ServiceList, "/services")
 api.add_resource(ServiceDetail, "/services/<int:service_id>")
 api.add_resource(BookingList, "/bookings")
+api.add_resource(BookingResource, "/bookings/<int:booking_id>")
 api.add_resource(StylistListResource, "/stylists")
 api.add_resource(StylistResource, "/stylists/<int:stylist_id>")
 

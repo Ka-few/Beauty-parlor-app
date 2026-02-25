@@ -119,6 +119,45 @@
   font-size: 1.2rem;
 }
 
+.booking-actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.booking-edit-input {
+  flex: 1 1 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid rgba(150, 25, 141, 0.25);
+  font-family: inherit;
+}
+
+.booking-action-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: #96198d;
+  color: #fff;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.booking-action-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.booking-action-btn.secondary {
+  background: #6f6f6f;
+}
+
+.booking-action-btn.danger {
+  background: #c93838;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .booking-list-container {
@@ -144,5 +183,9 @@
 
   .booking-card p {
     font-size: 0.9rem;
+  }
+
+  .booking-actions {
+    gap: 0.5rem;
   }
 }

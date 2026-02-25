@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import './PaymentPage.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://beauty-parlor-app-5.onrender.com';
@@ -9,7 +10,6 @@ const CheckoutForm = ({ bookingId, amount, serviceTitle }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [succeeded, setSucceeded] = useState(false);
 
   useEffect(() => {
     const customer = JSON.parse(localStorage.getItem('customer'));
@@ -38,15 +38,34 @@ const CheckoutForm = ({ bookingId, amount, serviceTitle }) => {
         }),
       });
 
+      const result = await response.json();
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Failed to initiate M-Pesa payment');
+        const detailsMessage =
+          result?.details?.errorMessage ||
+          result?.details?.ResponseDescription ||
+          result?.details?.raw;
+        throw new Error(detailsMessage || result.error || 'Failed to initiate M-Pesa payment');
       }
 
-      setSucceeded(true);
+      await Swal.fire({
+        icon: 'success',
+        title: 'Payment Request Sent',
+        text:
+          result?.CustomerMessage ||
+          'Please check your phone and complete the payment prompt.',
+        confirmButtonText: 'OK',
+      });
+      navigate('/my-bookings');
     } catch (err) {
       console.error("Error initiating M-Pesa payment:", err);
       setError(err.message);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Payment Failed',
+        text: err.message || 'Could not initiate payment.',
+        confirmButtonText: 'OK',
+      });
+      navigate('/my-bookings');
     } finally {
       setLoading(false);
     }
@@ -59,12 +78,6 @@ const CheckoutForm = ({ bookingId, amount, serviceTitle }) => {
       {amount && <p>Amount: Ksh {amount}</p>}
 
       {error && <div className="payment-error">{error}</div>}
-      {succeeded && (
-        <div className="payment-success">
-          <p>Payment initiated successfully!</p>
-          <p>Please check your phone for a prompt to complete the payment.</p>
-        </div>
-      )}
 
       <div className="phone-number-container">
         <label htmlFor="phone-number">Phone Number</label>
@@ -78,7 +91,7 @@ const CheckoutForm = ({ bookingId, amount, serviceTitle }) => {
         />
       </div>
 
-      <button type="submit" disabled={loading || succeeded} className="pay-button">
+      <button type="submit" disabled={loading} className="pay-button">
         {loading ? 'Processing...' : 'Pay Now'}
       </button>
     </form>
@@ -110,4 +123,3 @@ export default function PaymentPage() {
     </div>
   );
 }
-
