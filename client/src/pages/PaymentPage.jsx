@@ -4,6 +4,8 @@ import Swal from 'sweetalert2';
 import './PaymentPage.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://beauty-parlor-app-5.onrender.com';
+const PAYMENT_POLL_INTERVAL_MS = 3000;
+const PAYMENT_POLL_MAX_ATTEMPTS = 12;
 
 const CheckoutForm = ({ bookingId, amount, serviceTitle }) => {
   const navigate = useNavigate();
@@ -52,14 +54,57 @@ const CheckoutForm = ({ bookingId, amount, serviceTitle }) => {
         throw new Error(detailsMessage || result.error || 'Failed to initiate M-Pesa payment');
       }
 
-      await Swal.fire({
-        icon: 'success',
-        title: 'Payment Request Sent',
-        text:
-          result?.CustomerMessage ||
-          'Please check your phone and complete the payment prompt.',
-        confirmButtonText: 'OK',
+      Swal.fire({
+        title: 'Waiting for Payment Confirmation',
+        text: 'Complete the M-Pesa prompt on your phone.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
       });
+
+      let paymentStatus = 'pending';
+      for (let attempt = 0; attempt < PAYMENT_POLL_MAX_ATTEMPTS; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, PAYMENT_POLL_INTERVAL_MS));
+        const statusResponse = await fetch(
+          `${API_URL}/bookings/${bookingId}/payment-status`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (!statusResponse.ok) {
+          continue;
+        }
+
+        const statusData = await statusResponse.json();
+        paymentStatus = statusData?.payment_status || 'pending';
+
+        if (paymentStatus === 'successful' || paymentStatus === 'incomplete') {
+          break;
+        }
+      }
+
+      Swal.close();
+
+      if (paymentStatus === 'successful') {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Payment Successful',
+          text: 'Your booking payment was completed successfully.',
+          confirmButtonText: 'OK',
+        });
+      } else {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Payment Failed or Incomplete',
+          text: 'Payment was not completed. Your booking remains pending/incomplete.',
+          confirmButtonText: 'OK',
+        });
+      }
+
       navigate('/my-bookings');
     } catch (err) {
       console.error("Error initiating M-Pesa payment:", err);

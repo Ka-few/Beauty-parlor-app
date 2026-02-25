@@ -383,6 +383,7 @@ class AdminBookingList(Resource):
 class InitiateMpesaPayment(Resource):
     @jwt_required()
     def post(self):
+        current_customer_id = int(get_jwt_identity())
         data = request.get_json()
         amount = data.get("amount")
         phone_number = data.get("phone_number")
@@ -402,12 +403,15 @@ class InitiateMpesaPayment(Resource):
         booking = Booking.query.get(booking_id)
         if not booking:
             return {"error": "Booking not found"}, 404
+        if booking.customer_id != current_customer_id:
+            return {"error": "Unauthorized"}, 403
 
         access_token, token_error = get_mpesa_access_token()
         if not access_token:
             return {"error": "Could not get M-Pesa access token", "details": token_error}, 500
 
-        api_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+        base_url = os.getenv("MPESA_BASE_URL", "https://sandbox.safaricom.co.ke").rstrip("/")
+        api_url = f"{base_url}/mpesa/stkpush/v1/processrequest"
         headers = {"Authorization": f"Bearer {access_token}"}
 
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -439,7 +443,14 @@ class InitiateMpesaPayment(Resource):
         try:
             response = requests.post(api_url, json=payload, headers=headers)
             response.raise_for_status()
-            return response.json(), 200
+            response_data = response.json()
+
+            booking.payment_status = "pending"
+            if response_data.get("CheckoutRequestID"):
+                booking.payment_intent_id = response_data.get("CheckoutRequestID")
+            db.session.commit()
+
+            return response_data, 200
         except requests.exceptions.RequestException as e:
             if e.response is not None:
                 try:
@@ -455,10 +466,41 @@ class InitiateMpesaPayment(Resource):
 
 class MpesaCallback(Resource):
     def post(self):
-        data = request.get_json()
-        # Process the callback data here
+        data = request.get_json() or {}
+        stk_callback = data.get("Body", {}).get("stkCallback", {})
+        checkout_request_id = stk_callback.get("CheckoutRequestID")
+        result_code = stk_callback.get("ResultCode")
+
+        if checkout_request_id:
+            booking = Booking.query.filter_by(payment_intent_id=checkout_request_id).first()
+            if booking:
+                if result_code == 0:
+                    booking.payment_status = "successful"
+                else:
+                    booking.payment_status = "incomplete"
+                db.session.commit()
+
         print("M-Pesa Callback:", data)
         return {"ResultCode": 0, "ResultDesc": "Accepted"}, 200
+
+
+class BookingPaymentStatus(Resource):
+    @jwt_required()
+    def get(self, booking_id):
+        current_customer_id = int(get_jwt_identity())
+        booking = Booking.query.get(booking_id)
+        if not booking:
+            return {"error": "Booking not found"}, 404
+
+        customer = Customer.query.get(current_customer_id)
+        is_admin = bool(customer and customer.is_admin)
+        if booking.customer_id != current_customer_id and not is_admin:
+            return {"error": "Unauthorized"}, 403
+
+        return {
+            "booking_id": booking.id,
+            "payment_status": booking.payment_status
+        }, 200
 
 
 
@@ -512,6 +554,7 @@ api.add_resource(ServiceList, "/services")
 api.add_resource(ServiceDetail, "/services/<int:service_id>")
 api.add_resource(BookingList, "/bookings")
 api.add_resource(BookingResource, "/bookings/<int:booking_id>")
+api.add_resource(BookingPaymentStatus, "/bookings/<int:booking_id>/payment-status")
 api.add_resource(StylistListResource, "/stylists")
 api.add_resource(StylistResource, "/stylists/<int:stylist_id>")
 

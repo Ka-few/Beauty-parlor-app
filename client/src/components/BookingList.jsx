@@ -147,6 +147,12 @@ export default function BookingList({ token, customer }) {
     }
   };
 
+  const getPaymentLabel = (status) => {
+    if (status === "successful") return "Successful";
+    if (status === "incomplete") return "Incomplete";
+    return "Pending";
+  };
+
   return (
     <div className="booking-list-container">
       <h2>My Bookings</h2>
@@ -165,6 +171,12 @@ export default function BookingList({ token, customer }) {
               <p className="booking-date">
                 <strong>Date:</strong>{" "}
                 {new Date(b.appointment_time).toLocaleString()}
+              </p>
+              <p>
+                <strong>Payment:</strong>{" "}
+                <span className={`payment-status payment-${b.payment_status || "pending"}`}>
+                  {getPaymentLabel(b.payment_status)}
+                </span>
               </p>
               {editingBookingId === b.id ? (
                 <div className="booking-actions">
