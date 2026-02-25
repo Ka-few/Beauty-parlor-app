@@ -1,23 +1,17 @@
 import { Navigate } from "react-router-dom";
 
-export default function AdminRoute({ children }) {
-  const customerStr = localStorage.getItem("customer");
-
-  if (!customerStr) {
-    return <Navigate to="/login" />;
+export default function AdminRoute({ children, customer, loading }) {
+  if (loading) {
+    return <p>Loading...</p>;
   }
 
-  try {
-    const customer = JSON.parse(customerStr);
-    if (customer && customer.is_admin) {
-      return children;
-    }
-  } catch (error) {
-    console.error("Failed to parse customer from localStorage", error);
-    // If parsing fails, treat as not logged in
-    return <Navigate to="/login" />;
+  if (!customer) {
+    return <Navigate to="/login" replace />;
   }
 
-  // If not an admin, redirect to the home page
-  return <Navigate to="/" />;
+  if (!customer.is_admin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 }

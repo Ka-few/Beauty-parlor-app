@@ -44,6 +44,13 @@ export default function Login({ setCustomer, setToken }) {
           ...result.customer,
           is_admin: result.customer.is_admin ?? false,
         });
+        localStorage.setItem(
+          "customer",
+          JSON.stringify({
+            ...result.customer,
+            is_admin: result.customer.is_admin ?? false,
+          })
+        );
 
         localStorage.removeItem("redirectAfterLogin");
         resetForm();
