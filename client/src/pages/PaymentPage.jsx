@@ -40,10 +40,15 @@ const CheckoutForm = ({ bookingId, amount, serviceTitle }) => {
 
       const result = await response.json();
       if (!response.ok) {
+        const details =
+          typeof result?.details === 'string'
+            ? result.details
+            : result?.details?.errorMessage ||
+              result?.details?.ResponseDescription ||
+              result?.details?.raw;
         const detailsMessage =
-          result?.details?.errorMessage ||
-          result?.details?.ResponseDescription ||
-          result?.details?.raw;
+          details ||
+          (result?.status_code ? `M-Pesa status ${result.status_code}` : null);
         throw new Error(detailsMessage || result.error || 'Failed to initiate M-Pesa payment');
       }
 

@@ -403,9 +403,9 @@ class InitiateMpesaPayment(Resource):
         if not booking:
             return {"error": "Booking not found"}, 404
 
-        access_token = get_mpesa_access_token()
+        access_token, token_error = get_mpesa_access_token()
         if not access_token:
-            return {"error": "Could not get M-Pesa access token"}, 500
+            return {"error": "Could not get M-Pesa access token", "details": token_error}, 500
 
         api_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
         headers = {"Authorization": f"Bearer {access_token}"}
