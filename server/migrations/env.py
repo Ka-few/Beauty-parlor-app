@@ -69,7 +69,11 @@ def run_migrations_offline():
     )
 
     with context.begin_transaction():
-        context.run_migrations()
+        try:
+            context.run_migrations()
+        except Exception:
+            logger.exception('Database migration failed. Verify DATABASE_URL, connectivity, and migration state.')
+            raise
 
 
 def run_migrations_online():
@@ -104,7 +108,11 @@ def run_migrations_online():
         )
 
         with context.begin_transaction():
-            context.run_migrations()
+            try:
+                context.run_migrations()
+            except Exception:
+                logger.exception('Database migration failed. Verify DATABASE_URL, connectivity, and migration state.')
+                raise
 
 
 if context.is_offline_mode():

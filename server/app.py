@@ -10,15 +10,16 @@ from datetime import datetime
 import os
 import base64
 import requests
-from dotenv import load_dotenv
-
-load_dotenv()
+import logging
+from sqlalchemy import text
+from config import Config
 
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///beauty_parlour.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["JWT_SECRET_KEY"] = "super-secret"  # change this in production!
+app.config.from_object(Config)
+
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO").upper())
+logger = logging.getLogger(__name__)
 
 
 CORS(
@@ -37,6 +38,23 @@ migrate = Migrate(app, db)
 api = Api(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
+
+
+def verify_database_connection():
+    """Fail fast in production and emit actionable diagnostics on connection errors."""
+    try:
+        Config.validate()
+        with db.engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        logger.info("Database connection verified (%s)", db.engine.url.get_backend_name())
+    except Exception:
+        logger.exception("Database startup check failed. Check DATABASE_URL and database availability.")
+        if app.config["IS_PRODUCTION"]:
+            raise
+
+
+with app.app_context():
+    verify_database_connection()
 
 # ---------------- AUTH ---------------- #
 def admin_required(fn):

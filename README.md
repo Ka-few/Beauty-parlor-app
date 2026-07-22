@@ -44,7 +44,7 @@ flask run
 ```
 
 Notes:
-- `python seed.py` drops and recreates the database. Use only in development.
+- `python seed.py` is idempotent and preserves existing records. Apply migrations first.
 - The API runs on `http://127.0.0.1:5000` by default.
 
 ### Frontend Setup
@@ -65,6 +65,10 @@ MPESA_SHORTCODE=your_shortcode
 MPESA_PASSKEY=your_passkey
 BASE_URL=http://127.0.0.1:5000
 ```
+
+For SQLite/Supabase configuration and Render deployment, see
+[`server/DEPLOYMENT.md`](server/DEPLOYMENT.md). SQLite is the default locally;
+production requires `DATABASE_URL`, `SECRET_KEY`, and `JWT_SECRET_KEY`.
 
 ## API Overview
 Authentication:

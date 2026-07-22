@@ -22,3 +22,7 @@ rad.json
 TestResults.xml
 
 .env
+
+# Local Flask database and Python build artifacts
+server/instance/*.db
+**/__pycache__/

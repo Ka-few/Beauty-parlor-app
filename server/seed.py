@@ -1,55 +1,65 @@
+"""Idempotent default data seed. Run migrations before executing this script."""
+
 from datetime import datetime, timedelta
-from app import app, db, bcrypt
-from models import Customer, Stylist, Service, Booking
 
-with app.app_context():
-    # Drop all tables and recreate them from scratch
-    db.drop_all()
-    db.create_all()
+from app import app, bcrypt, db
+from models import Booking, Customer, Service, Stylist
 
-    # --- Default Admin User ---
-    admin_password_hash = bcrypt.generate_password_hash("admin123").decode()
-    admin = Customer(name="admin", phone="0700123456", password_hash=admin_password_hash, is_admin=True)
-    db.session.add(admin)
-    db.session.commit()
 
-    # --- Customers ---
-    customer1 = Customer(name="Alice Johnson", phone="0765235645", password_hash="hashedpassword1", is_admin=False)
-    customer2 = Customer(name="Bob Smith", phone="0789098790", password_hash="hashedpassword2", is_admin=False)
-    db.session.add_all([customer1, customer2])
-    db.session.commit()
+def get_or_create(model, defaults=None, **lookup):
+    instance = model.query.filter_by(**lookup).first()
+    if instance is None:
+        instance = model(**lookup, **(defaults or {}))
+        db.session.add(instance)
+    return instance
 
-    # --- Services ---
-    service1 = Service(title="Haircut", description="Basic haircut service", price=30)
-    service2 = Service(title="Hair Coloring", description="Professional hair coloring", price=50)
-    service3 = Service(title="Manicure", description="Complete manicure service", price=25)
-    db.session.add_all([service1, service2, service3])
-    db.session.commit()
 
-    # --- Stylists ---
-    stylist1 = Stylist(name="Sophie Lee", bio="Expert in haircuts and styling", services=[service1, service2])
-    stylist2 = Stylist(name="David Kim", bio="Specialist in nail care and hair coloring", services=[service2, service3])
-    db.session.add_all([stylist1, stylist2])
-    db.session.commit()
-
-    # --- Bookings ---
-    booking1 = Booking(
-        appointment_time=datetime.now() + timedelta(days=1, hours=10),
-        customer=customer1,
-        stylist=stylist1,
-        service=service1
+def seed_database():
+    """Insert the original defaults without deleting or duplicating existing data."""
+    # Do not call create_all/drop_all here. Schema changes must go through Flask-Migrate.
+    get_or_create(
+        Customer,
+        phone="0700123456",
+        defaults={
+            "name": "admin",
+            "password_hash": bcrypt.generate_password_hash("admin123").decode(),
+            "is_admin": True,
+        },
     )
-    booking2 = Booking(
-        appointment_time=datetime.now() + timedelta(days=2, hours=14),
-        customer=customer2,
-        stylist=stylist2,
-        service=service3
+    customer1 = get_or_create(
+        Customer, phone="0765235645",
+        defaults={"name": "Alice Johnson", "password_hash": "hashedpassword1", "is_admin": False},
     )
-    db.session.add_all([booking1, booking2])
-    db.session.commit()
+    customer2 = get_or_create(
+        Customer, phone="0789098790",
+        defaults={"name": "Bob Smith", "password_hash": "hashedpassword2", "is_admin": False},
+    )
 
-    print("✅ Database seeded successfully!")
-    print("\n📋 Default Admin Credentials:")
-    print("   Name: admin")
-    print("   Phone: 0700123456")
-    print("   Password: admin123")
+    service1 = get_or_create(Service, title="Haircut", defaults={"description": "Basic haircut service", "price": 30})
+    service2 = get_or_create(Service, title="Hair Coloring", defaults={"description": "Professional hair coloring", "price": 50})
+    service3 = get_or_create(Service, title="Manicure", defaults={"description": "Complete manicure service", "price": 25})
+
+    stylist1 = get_or_create(Stylist, name="Sophie Lee", defaults={"bio": "Expert in haircuts and styling"})
+    stylist2 = get_or_create(Stylist, name="David Kim", defaults={"bio": "Specialist in nail care and hair coloring"})
+    stylist1.services = [service1, service2]
+    stylist2.services = [service2, service3]
+    db.session.flush()
+
+    # The generated date changes every run, so use each original relationship triple as the seed key.
+    if not Booking.query.filter_by(customer_id=customer1.id, stylist_id=stylist1.id, service_id=service1.id).first():
+        db.session.add(Booking(appointment_time=datetime.now() + timedelta(days=1, hours=10), customer=customer1, stylist=stylist1, service=service1))
+    if not Booking.query.filter_by(customer_id=customer2.id, stylist_id=stylist2.id, service_id=service3.id).first():
+        db.session.add(Booking(appointment_time=datetime.now() + timedelta(days=2, hours=14), customer=customer2, stylist=stylist2, service=service3))
+
+    db.session.commit()
+    print("Database seeded successfully (existing records were preserved).")
+    print("Default admin: phone=0700123456 password=admin123")
+
+
+if __name__ == "__main__":
+    with app.app_context():
+        try:
+            seed_database()
+        except Exception:
+            db.session.rollback()
+            raise
