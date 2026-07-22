@@ -27,9 +27,11 @@ _load_dotenv(BASE_DIR / ".env")
 
 
 def _normalise_database_url(url: str) -> str:
-    """Accept legacy Heroku/Supabase-style postgres URLs used by some hosts."""
+    """Use Psycopg 3 and accept legacy Heroku/Supabase-style PostgreSQL URLs."""
     if url.startswith("postgres://"):
-        return "postgresql://" + url[len("postgres://"):]
+        url = "postgresql://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://"):]
     return url
 
 

@@ -21,7 +21,8 @@ The seed is idempotent: it inserts only missing defaults and does not drop table
    Render if your project uses IPv4-only outbound networking; use the direct URL only
    when it is reachable from Render. Include `?sslmode=require` if Supabase supplies it.
 3. The URL must look like `postgresql://USER:PASSWORD@HOST:PORT/postgres`.
-   If the provider gives `postgres://`, this app converts it automatically.
+   If the provider gives `postgres://`, this app converts it automatically. The app
+   uses the Psycopg 3 SQLAlchemy driver internally, which supports Render Python 3.13.
 
 ## Configure Render
 
@@ -39,6 +40,8 @@ Set these environment variables in Render (mark secrets as secret):
 
 Do not set a SQLite URL on Render. On boot the service checks all required production
 variables and runs `SELECT 1`; a failed database check is logged and stops the service.
+If a Start Command is already set in the Render dashboard, update it there as well;
+Render dashboard settings override the repository `Procfile`.
 
 Open a Render Shell after the first deploy and run:
 
